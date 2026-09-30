@@ -1,0 +1,16 @@
+{
+  "name": "Marcador de Baloncesto",
+  "short_name": "Marcador",
+  "description": "Marcador de baloncesto con reloj de juego, reloj de posesion, faltas, tiempos muertos y fichas de jugadores. Funciona sin conexion.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "lang": "es",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

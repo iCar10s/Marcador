@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Marcador">
+<title>Marcador de Baloncesto</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127918;</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230b1020'/><circle cx='90' cy='90' r='52' fill='none' stroke='%23f97316' stroke-width='7'/><path d='M38 90h104M90 38v104M52 52q40 38 76 0M52 128q40-38 76 0' stroke='%23f97316' stroke-width='7' fill='none'/></svg>">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-view="control">
+
+<div id="app">
+
+  <div class="banner" id="banner" hidden></div>
+
+  <header class="topbar">
+    <div class="topbar__left">
+      <span class="brand">&#127918; Marcador</span>
+      <span class="chip chip--status" id="chipStatus">Presp. match</span>
+    </div>
+    <div class="topbar__right">
+      <button class="btn btn--icon" id="btnUndo" title="Deshacer (Ctrl+Z)" aria-label="Deshacer">&#8630;</button>
+      <button class="btn btn--icon" id="btnRoster" title="Editar jugadores" aria-label="Editar jugadores">&#128101;</button>
+      <button class="btn btn--icon" id="btnSettings" title="Ajustes" aria-label="Ajustes">&#9881;</button>
+      <button class="btn btn--icon" id="btnFull" title="Pantalla completa (F)" aria-label="Pantalla completa">&#9974;</button>
+    </div>
+  </header>
+
+  <main class="board" id="board">
+
+    <section class="team" data-side="home" id="teamHome">
+      <div class="team__bar" style="--team:var(--home-color)">
+        <button class="team__badge" id="homeBonus" title="Bonus de faltas" hidden>BONUS</button>
+        <input class="team__name" id="homeName" value="Local" maxlength="18" aria-label="Nombre equipo local" spellcheck="false">
+        <div class="team__poss" id="homePoss" title="Posesión de balón" hidden>&#9679;</div>
+      </div>
+      <div class="team__scorebox" style="--team:var(--home-color)">
+        <button class="team__score" id="homeScore" data-adjust="-1" title="Restar 1">0</button>
+      </div>
+      <div class="team__quick">
+        <button class="btn btn--pt" data-side="home" data-pts="1">+1</button>
+        <button class="btn btn--pt" data-side="home" data-pts="2">+2</button>
+        <button class="btn btn--pt" data-side="home" data-pts="3">+3</button>
+        <button class="btn btn--pt btn--sub" data-side="home" data-pts="-1">&minus;1</button>
+      </div>
+      <div class="team__stats">
+        <div class="stat">
+          <span class="stat__label">Faltas</span>
+          <div class="stat__val">
+            <button class="pill" data-side="home" data-foul="-1">&minus;</button>
+            <span class="stat__num" id="homeFouls">0</span>
+            <button class="pill" data-side="home" data-foul="1">+</button>
+          </div>
+        </div>
+        <div class="stat">
+          <span class="stat__label">T. muerto <em id="homeTmsLeft"></em></span>
+          <div class="stat__val">
+            <button class="pill" data-side="home" data-tm="-1">&minus;</button>
+            <div class="dots" id="homeDots"></div>
+            <button class="pill" data-side="home" data-tm="1">+</button>
+          </div>
+        </div>
+      </div>
+      <ul class="roster" id="homeRoster"></ul>
+    </section>
+
+    <section class="center">
+      <div class="center__clocks">
+        <div class="clockbox" id="gameClockBox">
+          <div class="clockbox__label">Reloj de juego</div>
+          <button class="clock" id="gameClock" title="Click: arrancar/parar">10:00</button>
+          <div class="clockbox__ctrls">
+            <button class="btn btn--sm" data-gc="-60">-1m</button>
+            <button class="btn btn--sm" data-gc="-1">-1s</button>
+            <button class="btn btn--sm" data-gc="1">+1s</button>
+            <button class="btn btn--sm" data-gc="60">+1m</button>
+            <button class="btn btn--sm btn--warn" data-gc="reset">Poner a 0</button>
+          </div>
+        </div>
+
+        <div class="center__meta">
+          <div class="periodbox">
+            <span class="periodbox__label" id="periodLabel">Periodo</span>
+            <div class="periodbox__val">
+              <button class="pill" id="periodDown">&minus;</button>
+              <span class="periodbox__num" id="periodNum">1</span>
+              <button class="pill" id="periodUp">+</button>
+            </div>
+          </div>
+          <div class="shotbox" id="shotBox">
+            <div class="shotbox__label">Posesion</div>
+            <button class="shotclock" id="shotClock" title="Click: arrancar/parar">24</button>
+            <div class="shotbox__ctrls">
+              <button class="btn btn--sm" data-sc="-1">&minus;1s</button>
+              <button class="btn btn--sm" data-sc="1">+1s</button>
+              <button class="btn btn--sm" data-sc="reset">Reiniciar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="center__bigctrls">
+        <button class="btn btn--big btn--go" id="btnStart">Iniciar partido</button>
+        <button class="btn btn--big btn--stop" id="btnStop" hidden>Finalizar periodo</button>
+        <button class="btn btn--big" id="btnTimeout">T. muerto</button>
+      </div>
+    </section>
+
+    <section class="team" data-side="away" id="teamAway">
+      <div class="team__bar" style="--team:var(--away-color)">
+        <button class="team__badge" id="awayBonus" title="Bonus de faltas" hidden>BONUS</button>
+        <input class="team__name" id="awayName" value="Visitante" maxlength="18" aria-label="Nombre equipo visitante" spellcheck="false">
+        <div class="team__poss" id="awayPoss" title="Posesión de balón" hidden>&#9679;</div>
+      </div>
+      <div class="team__scorebox" style="--team:var(--away-color)">
+        <button class="team__score" id="awayScore" data-adjust="-1" title="Restar 1">0</button>
+      </div>
+      <div class="team__quick">
+        <button class="btn btn--pt" data-side="away" data-pts="1">+1</button>
+        <button class="btn btn--pt" data-side="away" data-pts="2">+2</button>
+        <button class="btn btn--pt" data-side="away" data-pts="3">+3</button>
+        <button class="btn btn--pt btn--sub" data-side="away" data-pts="-1">&minus;1</button>
+      </div>
+      <div class="team__stats">
+        <div class="stat">
+          <span class="stat__label">Faltas</span>
+          <div class="stat__val">
+            <button class="pill" data-side="away" data-foul="-1">&minus;</button>
+            <span class="stat__num" id="awayFouls">0</span>
+            <button class="pill" data-side="away" data-foul="1">+</button>
+          </div>
+        </div>
+        <div class="stat">
+          <span class="stat__label">T. muerto <em id="awayTmsLeft"></em></span>
+          <div class="stat__val">
+            <button class="pill" data-side="away" data-tm="-1">&minus;</button>
+            <div class="dots" id="awayDots"></div>
+            <button class="pill" data-side="away" data-tm="1">+</button>
+          </div>
+        </div>
+      </div>
+      <ul class="roster" id="awayRoster"></ul>
+    </section>
+
+  </main>
+
+  <footer class="botbar">
+    <span class="hint"><kbd>Espacio</kbd> reloj</span>
+    <span class="hint"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> puntos</span>
+    <span class="hint"><kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd> jugador</span>
+    <span class="hint"><kbd>R</kbd> posesion</span>
+    <span class="hint"><kbd>O</kbd> balon</span>
+    <span class="hint"><kbd>T</kbd> t. muerto</span>
+    <span class="hint"><kbd>P</kbd> periodo</span>
+    <span class="hint"><kbd>L</kbd> modo pantalla</span>
+    <span class="hint"><kbd>F</kbd> pantalla completa</span>
+    <span class="hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> deshacer</span>
+    <span class="hint"><kbd>?</kbd> ayuda</span>
+    <span class="hint hint--save" id="saveState">Guardado</span>
+  </footer>
+
+</div>
+
+<dialog class="modal" id="dlgSettings">
+  <form method="dialog" class="modal__box">
+    <header class="modal__head">
+      <h2>Ajustes</h2>
+      <button class="btn btn--icon" value="close" aria-label="Cerrar">&#10005;</button>
+    </header>
+    <div class="modal__body">
+
+      <fieldset class="field">
+        <legend>Reglas</legend>
+        <label class="row">
+          <span>Perfil</span>
+          <select id="setProfile">
+            <option value="FIBA">FIBA / Nacional (4x10)</option>
+            <option value="NCAA">NCAA (2x20)</option>
+            <option value="NBA">NBA / Tinggi (4x12)</option>
+            <option value="SCHOOL">Escolar (4x8)</option>
+            <option value="CUSTOM">Personalizado</option>
+          </select>
+        </label>
+        <div class="grid2">
+          <label class="row"><span>Periodos</span><input type="number" id="setPeriods" min="1" max="9" step="1"></label>
+          <label class="row"><span>Minutos por periodo</span><input type="number" id="setPeriodMinutes" min="1" max="60" step="1"></label>
+        </div>
+        <label class="row"><span>Nombre de periodo</span><input type="text" id="setPeriodLabel" maxlength="10" placeholder="Q / P / T"></label>
+        <div class="grid2">
+          <label class="row"><span>Posesion (seg)</span><input type="number" id="setShotClock" min="5" max="60" step="1"></label>
+          <label class="row"><span>Faltas para bonus</span><input type="number" id="setBonusFouls" min="3" max="9" step="1"></label>
+        </div>
+        <div class="grid2">
+          <label class="row"><span>T. muertos por equipo</span><input type="number" id="setTimeouts" min="0" max="12" step="1"></label>
+          <label class="row"><span>Jugadores en pista</span><input type="number" id="setOnCourt" min="3" max="5" step="1"></label>
+        </div>
+        <label class="row row--check"><input type="checkbox" id="setAutoShotReset"> Reiniciar posesion al cambiar de equipo</label>
+        <label class="row row--check"><input type="checkbox" id="setCountUp"> Cronometrar hacia arriba</label>
+        <label class="row row--check"><input type="checkbox" id="setShowRoster"> Mostrar tarjetas de jugadores en el marcador</label>
+        <label class="row row--check"><input type="checkbox" id="setSound"> Sonidos</label>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Colores y tipografia</legend>
+        <div class="grid2">
+          <label class="row"><span>Local</span><input type="color" id="setHomeColor"></label>
+          <label class="row"><span>Visitante</span><input type="color" id="setAwayColor"></label>
+        </div>
+        <div class="grid2">
+          <label class="row"><span>Fondo</span><input type="color" id="setBgColor"></label>
+          <label class="row"><span>Acento</span><input type="color" id="setAccentColor"></label>
+        </div>
+        <label class="row">
+          <span>Fuente de numeros</span>
+          <select id="setFont">
+            <option value="digital">Digital (segmentos)</option>
+            <option value="system">Sistema</option>
+            <option value="mono">Monoespaciada</option>
+            <option value="condensed">Condensada</option>
+          </select>
+        </label>
+        <label class="row">
+          <span>Tema</span>
+          <select id="setTheme">
+            <option value="dark">Oscuro</option>
+            <option value="light">Claro</option>
+            <option value="oled">Negro puro (TV)</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Partidos</legend>
+        <div class="grid2">
+          <button type="button" class="btn" id="btnExport">Exportar (.json)</button>
+          <button type="button" class="btn" id="btnImport">Importar</button>
+        </div>
+        <div class="grid2">
+          <button type="button" class="btn btn--warn" id="btnNewGame">Nuevo partido</button>
+          <button type="button" class="btn btn--warn" id="btnResetGame">Reiniciar marcador</button>
+        </div>
+        <input type="file" id="fileImport" accept="application/json,.json" hidden>
+        <ul class="saves" id="saveList"></ul>
+      </fieldset>
+
+    </div>
+    <footer class="modal__foot">
+      <span class="modal__note">Atajos: <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> puntos del equipo con el balon &middot; con <kbd>Shift</kbd> del otro equipo</span>
+      <button class="btn btn--primary" value="close">Listo</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="modal" id="dlgRoster">
+  <form method="dialog" class="modal__box">
+    <header class="modal__head">
+      <h2>Jugadores</h2>
+      <button class="btn btn--icon" value="close" aria-label="Cerrar">&#10005;</button>
+    </header>
+    <div class="modal__body">
+      <p class="muted">Numero, nombre, puntos, faltas y minutos de cada jugador. Se guardan automaticamente.</p>
+      <div class="roster-edit">
+        <div class="roster-edit__col">
+          <h3 style="--team:var(--home-color)" id="rosterTitleHome">Local</h3>
+          <ul class="roster-edit__list" id="editHome"></ul>
+          <button type="button" class="btn btn--sm" data-addplayer="home">+ Anadir jugador</button>
+        </div>
+        <div class="roster-edit__col">
+          <h3 style="--team:var(--away-color)" id="rosterTitleAway">Visitante</h3>
+          <ul class="roster-edit__list" id="editAway"></ul>
+          <button type="button" class="btn btn--sm" data-addplayer="away">+ Anadir jugador</button>
+        </div>
+      </div>
+    </div>
+    <footer class="modal__foot">
+      <span class="modal__note">Tarjeta: <kbd>+1</kbd> <kbd>+2</kbd> <kbd>+3</kbd> puntos &middot; <kbd>F</kbd> falta &middot; <kbd>&#9201;</kbd> +30s de minutos jugados</span>
+      <button class="btn btn--primary" value="close">Cerrar</button>
+    </footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/state.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/shortcuts.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
