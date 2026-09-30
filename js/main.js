@@ -265,7 +265,10 @@
 
     primaryAction: function () {
       if (state.status === "pre") {
-        mutate(function () { state.status = "live"; });
+        mutate(function () {
+          state.status = "live";
+          state.gameRunning = true;
+        });
         ui.toast("Partido en juego");
         return;
       }
@@ -277,6 +280,7 @@
           state.gameSeconds = state.config.countUp ? 0 : SB.periodSeconds(state);
           state.shotSeconds = state.config.shotClockSeconds;
           state.status = "live";
+          state.gameRunning = true;
         });
         return;
       }
