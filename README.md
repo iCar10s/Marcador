@@ -1,51 +1,109 @@
 # 🏀 Marcador de Baloncesto
 
-Marcador de baloncesto completo que funciona **en cualquier navegador y sin internet**: tablet, iPad, Android, Windows, Mac o Linux. No necesita instalación, ni servidor, ni cuentas.
+Marcador de baloncesto completo que funciona **en cualquier navegador**: tablet, iPad, Android, Windows, Mac o Linux. No necesita instalación, ni cuentas, ni saber programar.
 
-**Descárgalo, doble clic, y a jugar.**
+**Abre la dirección, añádela a la pantalla de inicio, y a jugar.**
+
+Funciona en línea y también sin internet, para los recintos donde la wifi no llega.
 
 ---
 
 ## Cómo usarlo
 
-### Opción 1 — Doble clic (recomendada)
+Hay dos formas de abrirlo. **Elige según tengas internet o no.** Ninguna requiere instalar nada más que un navegador.
+
+### Opción 1 — En línea, con internet (recomendada)
+
+El marcador está publicado en GitHub Pages, gratis, y no necesita ningún equipo encendido:
+
+**https://icar10s.github.io/Marcador/**
+
+Copia esa dirección en la tablet, en el móvil o en el portátil. Ya está.
+
+> Si algún día la dirección no carga, es que GitHub Pages está desactivado en el repositorio. Se activa en 30 segundos: **Settings → Pages → Deploy from a branch → main → / (root) → Save**. Está explicado en [Desarrollo](#desarrollo).
+
+> La dirección es pública y cualquiera que la abra ve la app, pero **nadie ve tus partidos**: cada dispositivo tiene su propio marcador y todo se guarda solo en ese dispositivo. No hay servidor ni base de datos.
+
+#### Dejarlo como app en la tablet
+
+1. Abre la dirección de arriba.
+2. **Safari (iPad/iPhone)**: Compartir → *Añadir a pantalla de inicio*.
+3. **Chrome (Android)**: menú → *Añadir a pantalla de inicio*.
+
+Queda como una app a pantalla completa, con su propio icono y sin barra de navegador. Pulsa <kbd>F</kbd> para pantalla completa y los números se agrandan solos.
+
+### Opción 2 — Sin internet, en el local del partido
+
+Para recintos con wifi que no llega o que se cae. Necesitas **un equipo con Python 3** encendido junto a la pista.
 
 | Sistema | Archivo |
 |---|---|
-| macOS | `Iniciar Marcador.command` |
 | Windows | `Iniciar Marcador.bat` |
+| macOS | `Iniciar Marcador.command` |
 | Linux | `iniciar-marcador.sh` |
 
-El lanzador abre un servidor local en tu equipo y abre el marcador en el navegador. **Usa siempre esta opción**: el navegador guarda el marcador automáticamente y no se pierde al recargar, cerrar la pestaña o reiniciar la tablet.
+El lanzador abre un servidor local, muestra la dirección exacta que debes escribir en la tablet y se queda en primer plano:
+
+```
+  En este equipo:  http://localhost:8080/index.html
+
+  En la tablet o pantalla grande, conecta al MISMO wifi y abre:
+    http://192.168.1.50:8080/index.html
+```
+
+Abre **esa segunda dirección en la tablet**, no la del propio equipo. Si el puerto 8080 ya está ocupado, el lanzador busca el siguiente libre y te avisa.
+
+> La tablet y el equipo deben estar en la **misma red wifi**. El servidor es temporal: al cerrar la ventana negra, se para.
 
 En macOS, la primera vez puede que macOS pida permiso para abrir el archivo (**clic derecho → Abrir**).
 
-### Opción 2 — Abrir `index.html` directamente
+### Opción 3 — Abrir `index.html` directamente
 
-Funciona igual, pero Chrome y Edge **bloquean el guardado** cuando el archivo se abre sin servidor. Verás un aviso rojo arriba y el marcador **no se conservará al recargar**. Funciona bien en Safari y Firefox.
+Haz doble clic en `index.html`. Funciona, pero **no te lo recomendamos para un partido**: al abrir un archivo sin servidor, algunos navegadores bloquean el guardado y el marcador se pierde al recargar. Úsalo solo para curiosear.
 
-### Opción 3 — Como app en la tablet
+---
 
-1. Abre el marcador desde el lanzador y anota la dirección (por ejemplo `http://192.168.1.50:8080`).
-2. En **Safari (iPad/iPhone)**: Compartir → *Añadir a pantalla de inicio*.
-3. En **Chrome (Android)**: menú → *Añadir a pantalla de inicio*.
+## Plan del día del partido
 
-Quedará como una app a pantalla completa, con su propio icono.
+1. **Prueba la Opción 1 en el móvil, con 4G**, unos días antes. Si la wifi del recinto va a fallar, ya lo sabes de antemano.
+2. **Al llegar, prueba la wifi del recinto.** Si carga la dirección de GitHub, ya estás: úsala y no necesitas nada más.
+3. **Si no hay internet**, arranca el `.bat` en un portátil con Python y usa la dirección IP que te muestre. Deja el portátil enchufado y con la tapa cerrada, pero **encendido**.
+4. **Deja siempre abierto un lanzador como reserva.** Si el portátil se apaga o se queda sin batería, al menos tienes la nube.
+5. **Prueba con el reloj corriendo antes del partido.** Arranca el reloj, espera a que llegue a 0, y comprueba que salta el pitido. El sonido es lo que más falla.
+
+### Consejo sobre la batería
+
+La tablet con pantalla encendida durante 2 horas de partido puede agotarse. El marcador intenta mantener la pantalla activa (wake lock), pero el navegador puede ignorarlo. **Ten el cargador a mano** y, si puedes, ponle un límite de carga alto para que no se apague sola.
 
 ---
 
 ## Verlo en una pantalla grande
 
-Este es el escenario pensado para el que está diseñado: **la tablet hace de marcador y la pantalla grande muestra el resultado**.
+Aquí hay que ser claro, porque es la confusión más habitual:
 
-1. Con la tablet y la pantalla conectadas a la **misma red WiFi**.
-2. En el equipo, averigua su IP (en macOS: Ajustes de red; en Windows: `ipconfig`).
-3. Arranca el lanzador y abre en la pantalla grande `http://IP-DEL-EQUIPO:8080` (por ejemplo `http://192.168.1.50:8080`).
-4. Pulsa <kbd>F</kbd> para **pantalla completa**. La barra de herramientas desaparece y los números se agrandan solos.
+> **Cada dispositivo tiene su propio marcador. No se sincronizan entre sí.**
 
-En iPad, "Añadir a pantalla de inicio" + botón de pantalla completa deja el marcador sin bordes, como una app de TV.
+Si abres el marcador en la tablet y en la pantalla grande, verás **dos marcadores independientes**, no el mismo. La pantalla grande saldrá a 0-0 aunque la tablet lleve 40 puntos.
 
-> Cada dispositivo tiene su propia copia del marcador. Si necesitas corregirlos a mano, usa **Ajustes → Exportar (.json)** y **Importar**.
+### Lo que sí funciona
+
+**Un solo dispositivo a pantalla completa.** En el navegador de ese dispositivo, pulsa <kbd>L</kbd> para el modo pantalla (oculta los controles) y <kbd>F</kbd> para pantalla completa. Los números se agrandan solos y queda limpio, como un marcador de TV.
+
+Sobre esa base, lo más práctico para un recinto es:
+
+- **Una tablet o móvil en la mesa, junto al marcador**, con el cargador puesto y a pantalla completa. Es lo que mejor se ve desde las gradas.
+- **Un portátil en la mesa con el `.bat` abierto**, y la tablet como segunda vista. **Pero solo para consultar**: si marcas puntos en uno, en el otro no se actualiza.
+
+### Lo que NO funciona
+
+- Poner la tablet junto a la pista y la pantalla grande con la misma URL **esperando ver lo mismo**. No va a pasar.
+- Confiar en que por ser la misma página se actualiza sola. No hay servidor que reparta nada.
+
+### Si de verdad necesitas dos marcadores sincronizados
+
+Eso exige un servidor que guarde el resultado y lo reparta entre dispositivos, no solo un archivo HTML. Es posible con un plan gratuito (Supabase o Firebase), pero es un desarrollo aparte y rompe la simplicidad de "un archivo y a jugar". Si lo necesitas, dímelo y lo planteamos en separado.
+
+Mientras tanto, para corregir un marcador a mano, usa **Ajustes → Exportar (.json)** e **Importar**.
 
 ---
 
@@ -122,7 +180,7 @@ Al cambiar de perfil se ajustan periodos, minutos, posesión, bonus, tiempos mue
 ## Estructura
 
 ```
-marcador-basketball/
+Marcador/
 ├── index.html                 estructura de la interfaz
 ├── Iniciar Marcador.command   lanzador macOS
 ├── Iniciar Marcador.bat       lanzador Windows
@@ -147,14 +205,46 @@ Sin dependencias, sin paso de compilación, sin framework. JavaScript plano para
 
 ## Desarrollo
 
-No hace falta instalar nada más que Python 3 para el servidor local:
+Para trabajar en local, un servidor de Python 3 es suficiente:
 
 ```bash
 python3 -m http.server 8080
 # abre http://localhost:8080
 ```
 
+Los lanzadores `.bat`, `.command` y `.sh` hacen exactamente esto, pero además buscan un puerto libre, abren el navegador y te muestran la dirección que hay que escribir en la tablet.
+
 Para probar en varios tamaños a la vez, usa las herramientas de desarrollo del navegador y cambia el modo dispositivo.
+
+### Publicar en GitHub Pages
+
+Para que la app quede online en `https://<usuario>.github.io/<repo>/`:
+
+1. En el repositorio, ve a **Settings → Pages**.
+2. En **Build and deployment → Source**, elige **Deploy from a branch**.
+3. Branch: `main`, carpeta: `/ (root)` → **Save**.
+4. Espera un minuto.
+
+Todo el proyecto usa rutas relativas, así que funciona en cualquier subcarpeta sin tocar nada.
+
+---
+
+## Problemas frecuentes
+
+**La tablet no abre la dirección del portátil.**
+No están en la misma wifi, o hay una red de invitados que aísla los dispositivos entre sí. Prueba con el hotspot de un móvil. También puede que el cortafuegos de Windows bloquee Python: en ese caso, permite Python en redes privadas la primera vez que lo pida.
+
+**Al recargar se me borra el marcador.**
+Estás en la Opción 3 (abriendo `index.html` sin servidor). Usa la Opción 1 o la 2.
+
+**No suena.**
+Los navegadores bloquean el audio hasta que tocas la pantalla. Haz un clic en cualquier parte al abrirla. Luego usa <kbd>M</kbd> para silenciar.
+
+**La pantalla se apaga durante el partido.**
+La tablet se queda dormida. Manténla enchufada y revisa los ajustes de bloqueo de pantalla del dispositivo.
+
+**El reloj va con retraso respecto a la reality.**
+Los relojes de partido se corrigen con <kbd>-1s</kbd> / <kbd>+1s</kbd> / <kbd>-1m</kbd> / <kbd>+1m</kbd>, o escribiendo directamente sobre la hora.
 
 ---
 

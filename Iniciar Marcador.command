@@ -20,10 +20,19 @@ else
 fi
 
 URL="http://localhost:$PORT/index.html"
+LANIP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}')
+
 echo ""
 echo "  Marcador de Baloncesto"
 echo "  -------------------------"
-echo "  Se abrira en: $URL"
+echo "  En este equipo:  $URL"
+if [ -n "$LANIP" ]; then
+  echo ""
+  echo "  En el iPad o la pantalla grande, conecta al MISMO wifi y abre:"
+  echo "    http://$LANIP:$PORT/index.html"
+  echo ""
+  echo "  (Ojo: solo funciona en la red local del recinto, sin internet.)"
+fi
 echo ""
 echo "  Dejar esta ventana abierta mientras dure el partido."
 echo "  Para cerrar el marcador: pulsa Ctrl+C aqui."
@@ -32,4 +41,4 @@ echo ""
 (sleep 1; open "$URL") &
 
 trap 'echo ""; echo "  Marcador cerrado."; exit 0' INT TERM
-$PY -m http.server $PORT --bind 127.0.0.1
+$PY -m http.server $PORT --bind 0.0.0.0

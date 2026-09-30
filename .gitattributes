@@ -1,0 +1,8 @@
+# Los lanzadores de Windows necesitan CRLF: cmd.exe parsea mal las etiquetas
+# goto si el fichero tiene finales de línea LF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Los lanzadores de Unix necesitan LF: sh/bash no ejecutan un script con CRLF.
+*.sh text eol=lf
+*.command text eol=lf
