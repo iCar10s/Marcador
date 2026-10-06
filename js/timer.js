@@ -41,6 +41,13 @@ SB.timer = (function () {
       else after = Math.max(after, 0);
       st.gameSeconds = after;
 
+      // Reloj de cada jugador en pista corre junto al de juego
+      SB.sides.forEach(function (side) {
+        var t = st[side];
+        var on = Math.min(st.config.onCourt, t.players.length);
+        for (var k = 0; k < on; k++) t.players[k].seconds += dt;
+      });
+
       var reached = countUp ? after >= limit : after <= 0;
       var i;
       if (reached) {

@@ -17,9 +17,11 @@ SB.ui = (function () {
       "homeDots", "awayDots", "homeTmsLeft", "awayTmsLeft", "homeBonus", "awayBonus",
       "homePoss", "awayPoss", "homeRoster", "awayRoster", "gameClock", "gameClockBox",
       "shotClock", "shotBox", "periodNum", "periodLabel", "periodDown", "periodUp",
-      "chipStatus", "btnStart", "btnStop", "btnTimeout", "saveState", "toast", "board",
+      "chipStatus", "btnStart", "btnStop", "btnTimeoutHome", "btnTimeoutAway", "btnPossSwitch", "saveState", "toast", "board",
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
-      "saveList", "fileImport", "btnUndo"
+      "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
+      "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -76,7 +78,8 @@ SB.ui = (function () {
         '<button class="mini mini--pts" data-act="pts" data-p="2" type="button">+2</button>' +
         '<button class="mini mini--pts" data-act="pts" data-p="3" type="button">+3</button>' +
         '<button class="mini mini--foul" data-act="foul" type="button" title="Falta personal">F<b>0</b></button>' +
-        '<button class="mini mini--time" data-act="time" type="button" title="Minutos jugados">0:00</button>' +
+        '<button class="mini mini--time" data-act="time" type="button" title="Minutos jugados (+30s al tocar)">0:00</button>' +
+        '<button class="mini mini--sub" data-act="sub" type="button" title="Cambio (meter/sacar)">&#8646;</button>' +
       '</div>';
     li.querySelector(".player__name").placeholder = SB.t("playerPlaceholder") + (index + 1);
     return li;
@@ -187,6 +190,29 @@ SB.ui = (function () {
     el.btnStart.classList.toggle("btn--go", state.status === "pre" || state.status === "break");
     el.btnStop.hidden = state.status !== "live";
     el.btnUndo.disabled = !SB.history.stack.length;
+    el.btnTimeoutHome.textContent = "T. muerto · " + state.home.name;
+    el.btnTimeoutAway.textContent = "T. muerto · " + state.away.name;
+  }
+
+  function renderPublic() {
+    el.pubClock.textContent = SB.formatClock(state.gameSeconds, state.config.countUp);
+    var limit = SB.periodSeconds(state);
+    var left = state.config.countUp ? limit - state.gameSeconds : state.gameSeconds;
+    el.pubClock.classList.toggle("low", left <= 10 && state.status === "live");
+    el.pubPeriod.textContent = SB.periodLabel(state);
+    el.pubShot.textContent = state.shotOff ? "--" : String(Math.ceil(state.shotSeconds));
+    el.pubShot.classList.toggle("off", state.shotOff);
+    el.pubHomeName.textContent = state.home.name;
+    el.pubAwayName.textContent = state.away.name;
+    el.pubHomeScore.textContent = String(state.home.score);
+    el.pubAwayScore.textContent = String(state.away.score);
+    el.pubHomeFouls.textContent = String(state.home.fouls);
+    el.pubAwayFouls.textContent = String(state.away.fouls);
+    var map = { pre: "Previo", live: "En juego", break: "Pausa", final: "Finalizado" };
+    el.pubStatus.textContent = map[state.status] || "Previo";
+    el.pubStatus.dataset.live = state.status === "live" ? "1" : "0";
+    el.pubPossHome.classList.toggle("on", state.possession === "home");
+    el.pubPossAway.classList.toggle("on", state.possession === "away");
   }
 
   function render() {
@@ -194,6 +220,7 @@ SB.ui = (function () {
     renderTeam("away");
     renderClocks();
     renderStatus();
+    renderPublic();
   }
 
   function renderSettingsForm() {
@@ -333,7 +360,11 @@ SB.ui = (function () {
 
     el.btnStart.addEventListener("click", function () { actions.primaryAction(); });
     el.btnStop.addEventListener("click", function () { actions.endPeriod(); });
-    el.btnTimeout.addEventListener("click", function () { actions.useTimeout(state.possession); });
+    el.btnTimeoutHome.addEventListener("click", function () { actions.useTimeout("home"); });
+    el.btnTimeoutAway.addEventListener("click", function () { actions.useTimeout("away"); });
+    el.btnPossSwitch.addEventListener("click", function () { actions.swapPossession(); });
+    el.homePoss.addEventListener("click", function () { actions.swapPossession(); });
+    el.awayPoss.addEventListener("click", function () { actions.swapPossession(); });
     el.btnUndo.addEventListener("click", function () { actions.undo(); });
 
     el.board.addEventListener("click", function (e) {
@@ -355,6 +386,7 @@ SB.ui = (function () {
           if (mini.dataset.act === "pts") actions.addPlayerPoints(found.side, found.id, Number(mini.dataset.p));
           else if (mini.dataset.act === "foul") actions.addPlayerFoul(found.side, found.id);
           else if (mini.dataset.act === "time") actions.addPlayerSeconds(found.side, found.id);
+          else if (mini.dataset.act === "sub") actions.subPlayer(found.side, found.id);
         }
         return;
       }
@@ -449,6 +481,10 @@ SB.ui = (function () {
     });
 
     $("btnFull").addEventListener("click", function () { api.toggleFullscreen(); });
+
+    $("btnPublic").addEventListener("click", function () {
+      window.open(location.pathname + "?view=display", "sb-public", "noopener");
+    });
 
     $("btnExport").addEventListener("click", function () {
       SB.storage.exportFile(state);

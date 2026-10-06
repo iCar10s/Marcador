@@ -13,8 +13,8 @@
   --radius: 14px;
   --gap: clamp(0.4rem, 1vw, 1rem);
   --score-size: clamp(3.2rem, 12vw, 16rem);
-  --clock-size: clamp(2.2rem, 6.2vw, 10rem);
-  --shot-size: clamp(1.4rem, 3.4vw, 3.6rem);
+  --clock-size: clamp(3.2rem, 9vw, 15rem);
+  --shot-size: clamp(1.8rem, 4.5vw, 5.5rem);
   --player-size: clamp(0.7rem, 1.15vw, 1.15rem);
   --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --num: var(--ui);
@@ -281,7 +281,9 @@ kbd {
 .mini--foul { color: var(--warn); display: inline-flex; align-items: center; gap: 0.2em; }
 .mini--foul b { font-family: var(--num); font-weight: 800; }
 .mini--time { color: var(--muted); font-family: var(--num); margin-left: auto; font-size: 0.9em; }
+.mini--sub { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
 .mini:active { transform: scale(0.9); }
+.team__poss { cursor: pointer; }
 
 /* ---------- centro ---------- */
 
@@ -366,10 +368,55 @@ kbd {
 
 body[data-view="display"] .topbar,
 body[data-view="display"] .botbar { display: none; }
+body[data-view="display"] { --clock-size: clamp(4rem, 13vw, 24rem); --shot-size: clamp(2.4rem, 6.5vw, 9rem); --score-size: clamp(4rem, 14vw, 18rem); }
 body[data-view="display"] .board { padding: clamp(0.3rem, 1.5vh, 1.5rem); height: 100dvh; }
 body[data-view="display"] .player__name { pointer-events: none; }
-body[data-view="display"] .btn--pt.btn--sub { display: none; }
-body[data-view="display"] .team__quick { grid-template-columns: repeat(3, 1fr); }
+body[data-view="display"] .team__quick,
+body[data-view="display"] .clockbox__ctrls,
+body[data-view="display"] .shotbox__ctrls,
+body[data-view="display"] .center__bigctrls,
+body[data-view="display"] .mini,
+body[data-view="display"] .pill,
+body[data-view="display"] #periodDown,
+body[data-view="display"] #periodUp { display: none; }
+body[data-view="display"] .team__score,
+body[data-view="display"] .clock,
+body[data-view="display"] .shotclock,
+body[data-view="display"] .team__name { pointer-events: none; }
+body[data-view="display"] #app { display: none; }
+#publicView { display: none; }
+body[data-view="display"] #publicView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  background: #000;
+  color: #eef2ff;
+  padding: 2vh 3vw;
+  text-align: center;
+}
+.pub__top { display: flex; gap: 1rem; align-items: center; width: 100%; justify-content: center; }
+.pub__period { font: 800 clamp(1.4rem, 4vw, 4rem)/1 var(--num); color: var(--accent); background: #10131f; border: 2px solid var(--accent); border-radius: 12px; padding: 0.2em 0.6em; }
+.pub__status { font: 800 clamp(1rem, 2.6vw, 2.4rem)/1 var(--ui); letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+.pub__status[data-live="1"] { color: var(--ok); }
+.pub__clock { font: 800 clamp(4rem, min(20vw, 24vh), 22rem)/1 var(--num); font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 60%, transparent); }
+.pub__clock.low { color: var(--warn); animation: blink 1s steps(2, start) infinite; }
+.pub__shot { font: 800 clamp(2rem, min(7vw, 9vh), 8rem)/1.1 var(--num); color: var(--ok); }
+.pub__shot.off { color: var(--muted); }
+.pub__scores { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); width: min(96vw, 1400px); }
+.pub__team { background: #0a0e18; border: 2px solid var(--line); border-radius: 18px; padding: 1rem; display: flex; flex-direction: column; gap: 0.3rem; align-items: center; }
+.pub__name { font: 800 clamp(1.2rem, min(4vw, 5vh), 4rem)/1.1 var(--ui); text-transform: uppercase; letter-spacing: 0.06em; }
+.pub__score { font: 800 clamp(3rem, min(14vw, 17vh), 16rem)/1 var(--num); font-variant-numeric: tabular-nums; }
+.pub__fouls { font: 700 clamp(0.9rem, 2vw, 1.8rem)/1 var(--ui); color: var(--muted); letter-spacing: 0.1em; }
+.pub__fouls span { color: var(--text); font-family: var(--num); }
+.pub__poss { font: 800 clamp(0.9rem, 2.2vw, 2rem)/1 var(--ui); color: var(--accent); visibility: hidden; }
+.pub__poss.on { visibility: visible; }
+
+body[data-view="display"] .team__poss { font-size: clamp(1.2rem, 2.6vw, 2.4rem); }
 
 /* ---------- modales ---------- */
 

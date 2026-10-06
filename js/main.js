@@ -2,6 +2,8 @@
   var state = null;
   var ui = null;
   var wakeLock = null;
+  var bus = null;
+  var isPublicWindow = /[?&]view=display/.test(window.location.search);
 
   function getState() { return state; }
 
@@ -10,12 +12,18 @@
     SB.ui.setState(next);
   }
 
+  function broadcast() {
+    if (!bus) return;
+    try { bus.postMessage({ type: "sb-state", state: state }); } catch (e) {}
+  }
+
   function snapshot() { SB.history.push(state); }
 
   function commit() {
     SB.storage.schedule(state);
     syncTimer();
     if (ui) ui.render();
+    broadcast();
   }
 
   function mutate(fn) {
@@ -116,6 +124,33 @@
       ui.setActivePlayer(side, id);
     },
 
+    subPlayer: function (side, id) {
+      mutate(function () {
+        var list = state[side].players;
+        var on = Math.min(state.config.onCourt, list.length);
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) if (list[i].id === id) idx = i;
+        if (idx < 0) return;
+        var target = -1;
+        if (idx < on) {
+          // Sacar: intercambia con el primer jugador de la banca
+          if (on < list.length) target = on;
+        } else {
+          // Meter: intercambia con el jugador activo en pista (o el primero)
+          var activeId = ui.getActive(side);
+          for (var j = 0; j < on; j++) if (list[j].id === activeId) { target = j; break; }
+          if (target < 0) target = 0;
+        }
+        if (target < 0 || target >= list.length || target === idx) return;
+        var tmp = list[idx];
+        list[idx] = list[target];
+        list[target] = tmp;
+        // El jugador intercambiado queda activo si esta en pista; si salio, el primero en pista
+        for (var k = 0; k < list.length; k++) if (list[k].id === id && k < on) { ui.setActivePlayer(side, id); return; }
+        ui.setActivePlayer(side, list[0].id);
+      });
+    },
+
     addPlayer: function (side) {
       mutate(function () {
         var n = state[side].players.length + 1;
@@ -196,6 +231,7 @@
     adjustShotClock: function (cmd) {
       mutate(function () {
         if (cmd === "reset") { state.shotSeconds = state.config.shotClockSeconds; state.shotRunning = false; return; }
+        if (cmd === "reset14") { state.shotSeconds = 14; state.shotRunning = false; state.shotOff = false; return; }
         state.shotSeconds = clamp(state.shotSeconds + Number(cmd), 0, state.config.shotClockSeconds);
       });
     },
@@ -240,6 +276,8 @@
         state.shotRunning = false;
         state.shotOff = false;
         state.status = "break";
+        state.home.fouls = 0;
+        state.away.fouls = 0;
       });
     },
 
@@ -252,6 +290,8 @@
         state.shotSeconds = state.config.shotClockSeconds;
         state.gameSeconds = SB.periodSeconds(state);
         state.status = isFinal ? "final" : "break";
+        state.home.fouls = 0;
+        state.away.fouls = 0;
       });
       if (isFinal) {
         SB.storage.archive(state);
@@ -281,6 +321,8 @@
           state.shotSeconds = state.config.shotClockSeconds;
           state.status = "live";
           state.gameRunning = true;
+          state.home.fouls = 0;
+          state.away.fouls = 0;
         });
         return;
       }
@@ -370,6 +412,7 @@
     switch (ev.type) {
       case "tick":
         ui.render();
+        broadcast();
         break;
       case "gcWarn":
         SB.audio.warn(ev.level);
@@ -406,7 +449,30 @@
 
     ui = SB.ui;
     SB.ui.init(state, actions);
-    SB.ui.setSaveIndicator(SB.storage.save(state));
+    if (isPublicWindow) SB.ui.setDisplayMode(true);
+    if (!isPublicWindow) SB.ui.setSaveIndicator(SB.storage.save(state));
+
+    if ("BroadcastChannel" in window) {
+      bus = new BroadcastChannel("sb-marcador");
+      bus.onmessage = function (ev) {
+        if (ev.data && ev.data.type === "sb-state" && ev.data.state) {
+          state = ev.data.state;
+          SB.ui.setState(state);
+          SB.ui.render();
+        }
+      };
+    }
+
+    window.addEventListener("storage", function (e) {
+      if (bus) return; // BroadcastChannel disponible: es la fuente en vivo
+      if (!e.key || e.key.indexOf("sb.") !== 0) return;
+      var restored2 = SB.storage.load();
+      if (restored2) {
+        state = restored2;
+        SB.ui.setState(state);
+        SB.ui.render();
+      }
+    });
 
     SB.timer.attach(getState, onTimerEvent);
     SB.shortcuts.init(getState, actions, SB.ui);
@@ -414,6 +480,7 @@
     SB.storage.onSave = function (ok) { SB.ui.setSaveIndicator(ok); };
 
     document.addEventListener("visibilitychange", function () {
+      if (isPublicWindow) return;
       if (document.visibilityState === "hidden") {
         SB.storage.save(state);
         if (wakeLock && wakeLock.release) wakeLock.release().catch(function () {});
@@ -423,8 +490,8 @@
       }
     });
 
-    window.addEventListener("pagehide", function () { SB.storage.save(state); });
-    window.addEventListener("beforeunload", function () { SB.storage.save(state); });
+    window.addEventListener("pagehide", function () { if (!isPublicWindow) SB.storage.save(state); });
+    window.addEventListener("beforeunload", function () { if (!isPublicWindow) SB.storage.save(state); });
 
     ["gesturestart", "gesturechange"].forEach(function (evt) {
       document.addEventListener(evt, function (e) { e.preventDefault(); });
@@ -436,9 +503,9 @@
       document.removeEventListener("pointerdown", once);
     }, { once: true });
 
-    if (restored) {
+    if (!isPublicWindow && restored) {
       SB.ui.toast(SB.t("restored"));
-    } else {
+    } else if (!isPublicWindow) {
       SB.storage.save(state);
     }
 

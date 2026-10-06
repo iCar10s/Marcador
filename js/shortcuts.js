@@ -45,6 +45,10 @@ SB.shortcuts = (function () {
 
     if (isTyping(e.target) || ui.anyDialogOpen()) return;
     if (e.altKey) return;
+    if (ui.isDisplayMode()) {
+      var k2 = e.key;
+      if (k2 !== "l" && k2 !== "L" && k2 !== "f" && k2 !== "F" && k2 !== "?" && k2 !== "/") { e.preventDefault(); return; }
+    }
 
     var mod = e.ctrlKey || e.metaKey;
 
