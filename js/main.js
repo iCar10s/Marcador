@@ -39,6 +39,21 @@
 
   function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
 
+  function resetClocks(opts) {
+    opts = opts || {};
+    if (!opts.keepRunning) {
+      state.gameRunning = false;
+      state.shotRunning = false;
+    }
+    if (opts.game === "full") state.gameSeconds = SB.periodSeconds(state);
+    else if (opts.game === "zero") state.gameSeconds = 0;
+    // "keep": no tocar
+    if (opts.shot === "reset") { state.shotSeconds = state.config.shotClockSeconds; state.shotOff = false; }
+    else if (opts.shot === "14") { state.shotSeconds = 14; state.shotOff = false; }
+    else if (opts.shot === "off") { state.shotOff = true; }
+    // "keep": no tocar
+  }
+
   function activePlayerId(side) {
     var id = ui.getActive(side);
     if (id && ui.findPlayer(side, id)) return id;
@@ -184,8 +199,7 @@
       }
       mutate(function () {
         state[side].timeoutsUsed += 1;
-        state.gameRunning = false;
-        state.shotRunning = false;
+        resetClocks({ game: "keep", shot: "keep" });
         if (state.status === "pre") state.status = "live";
       });
       SB.audio.timeout();
@@ -215,7 +229,7 @@
     },
 
     resetGameClockToFull: function () {
-      state.gameSeconds = state.config.countUp ? 0 : SB.periodSeconds(state);
+      resetClocks({ game: state.config.countUp ? "zero" : "full", shot: "keep", keepRunning: true });
       state.gameRunning = false;
       commit();
     },
@@ -238,9 +252,8 @@
 
     resetShotClock: function () {
       mutate(function () {
-        state.shotSeconds = state.config.shotClockSeconds;
+        resetClocks({ game: "keep", shot: "reset", keepRunning: true });
         state.shotRunning = false;
-        state.shotOff = false;
       });
     },
 
@@ -257,9 +270,8 @@
       mutate(function () {
         state.possession = SB.other(state.possession);
         if (state.config.autoShotReset) {
-          state.shotSeconds = state.config.shotClockSeconds;
+          resetClocks({ game: "keep", shot: "reset", keepRunning: true });
           state.shotRunning = false;
-          state.shotOff = false;
         }
       });
     },
@@ -270,11 +282,7 @@
       mutate(function () {
         state.period = next;
         state.overtime = Math.max(0, next - state.config.periods);
-        state.gameSeconds = state.config.countUp ? 0 : SB.periodSeconds(state);
-        state.shotSeconds = state.config.shotClockSeconds;
-        state.gameRunning = false;
-        state.shotRunning = false;
-        state.shotOff = false;
+        resetClocks({ game: state.config.countUp ? "zero" : "full", shot: "reset" });
         state.status = "break";
         state.home.fouls = 0;
         state.away.fouls = 0;
@@ -284,11 +292,7 @@
     endPeriod: function () {
       var isFinal = state.period >= state.config.periods;
       mutate(function () {
-        state.gameRunning = false;
-        state.shotRunning = false;
-        state.shotOff = false;
-        state.shotSeconds = state.config.shotClockSeconds;
-        state.gameSeconds = SB.periodSeconds(state);
+        resetClocks({ game: "full", shot: "reset" });
         state.status = isFinal ? "final" : "break";
         state.home.fouls = 0;
         state.away.fouls = 0;
@@ -317,10 +321,9 @@
         mutate(function () {
           state.period += 1;
           state.overtime = Math.max(0, state.period - state.config.periods);
-          state.gameSeconds = state.config.countUp ? 0 : SB.periodSeconds(state);
-          state.shotSeconds = state.config.shotClockSeconds;
-          state.status = "live";
+          resetClocks({ game: state.config.countUp ? "zero" : "full", shot: "reset", keepRunning: true });
           state.gameRunning = true;
+          state.status = "live";
           state.home.fouls = 0;
           state.away.fouls = 0;
         });
