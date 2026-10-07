@@ -21,6 +21,25 @@ SB.storage = (function () {
 
   var ok = available();
 
+  function serialize(state) {
+    return {
+      v: state.v,
+      id: state.id,
+      createdAt: state.createdAt,
+      updatedAt: state.updatedAt,
+      config: state.config,
+      home: state.home,
+      away: state.away,
+      period: state.period,
+      overtime: state.overtime,
+      gameSeconds: state.gameSeconds,
+      shotSeconds: state.shotSeconds,
+      shotOff: state.shotOff,
+      possession: state.possession,
+      status: state.status
+    };
+  }
+
   function readJSON(key, fallback) {
     if (!ok) return fallback;
     try {
@@ -58,22 +77,7 @@ SB.storage = (function () {
     save: function (state) {
       if (!ok) return false;
       state.updatedAt = Date.now();
-      var payload = {
-        v: state.v,
-        id: state.id,
-        createdAt: state.createdAt,
-        updatedAt: state.updatedAt,
-        config: state.config,
-        home: state.home,
-        away: state.away,
-        period: state.period,
-        overtime: state.overtime,
-        gameSeconds: state.gameSeconds,
-        shotSeconds: state.shotSeconds,
-        shotOff: state.shotOff,
-        possession: state.possession,
-        status: state.status
-      };
+      var payload = serialize(state);
       var good = writeJSON(KEY_CURRENT, payload);
       if (good) rotateSlot(payload);
       return good;
@@ -83,8 +87,8 @@ SB.storage = (function () {
       if (pending) clearTimeout(pending);
       pending = setTimeout(function () {
         pending = null;
-        api.save(state);
-        if (api.onSave) api.onSave(api.save.lastOk !== false);
+        var okSave = api.save(state);
+        if (api.onSave) api.onSave(okSave);
       }, 120);
     },
 
@@ -126,22 +130,7 @@ SB.storage = (function () {
         period: state.period,
         periods: state.config.periods,
         status: state.status,
-        data: {
-          v: state.v,
-          id: state.id,
-          createdAt: state.createdAt,
-          updatedAt: state.updatedAt,
-          config: state.config,
-          home: state.home,
-          away: state.away,
-          period: state.period,
-          overtime: state.overtime,
-          gameSeconds: state.gameSeconds,
-          shotSeconds: state.shotSeconds,
-          shotOff: state.shotOff,
-          possession: state.possession,
-          status: state.status
-        }
+        data: serialize(state)
       });
       writeJSON(KEY_INDEX, list.slice(0, 40));
       return list;
@@ -172,20 +161,21 @@ SB.storage = (function () {
     },
 
     exportPayload: function (state) {
+      var payload = serialize(state);
       return {
         app: "marcador-basketball",
         v: state.v,
         exportedAt: new Date().toISOString(),
-        config: state.config,
-        home: state.home,
-        away: state.away,
-        period: state.period,
-        overtime: state.overtime,
-        gameSeconds: state.gameSeconds,
-        shotSeconds: state.shotSeconds,
-        shotOff: state.shotOff,
-        possession: state.possession,
-        status: state.status
+        config: payload.config,
+        home: payload.home,
+        away: payload.away,
+        period: payload.period,
+        overtime: payload.overtime,
+        gameSeconds: payload.gameSeconds,
+        shotSeconds: payload.shotSeconds,
+        shotOff: payload.shotOff,
+        possession: payload.possession,
+        status: payload.status
       };
     },
 
