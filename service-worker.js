@@ -18,6 +18,7 @@ const ASSETS = [
   './js/i18n.js',
   './js/ui.js',
   './js/shortcuts.js',
+  './js/pwa.js',
   './js/main.js'
 ];
 

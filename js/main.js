@@ -515,7 +515,6 @@
     window.SBApp = { getState: getState, actions: actions, ui: SB.ui, timer: SB.timer };
 
     // --- PWA: service worker (solo http/https; file:// queda intacto) ---
-    var deferredInstallPrompt = null;
     if (location.protocol === "http:" || location.protocol === "https:") {
       if ("serviceWorker" in navigator) {
         var reloadingForSw = false;
@@ -548,19 +547,11 @@
         });
       }
 
-      window.addEventListener("beforeinstallprompt", function (e) {
-        e.preventDefault();
-        deferredInstallPrompt = e;
-        if (typeof SB.ui.showInstallButton === "function") SB.ui.showInstallButton();
-      });
-
       window.SBApp.promptInstall = function () {
-        if (!deferredInstallPrompt) return Promise.resolve(null);
-        var p = deferredInstallPrompt;
-        deferredInstallPrompt = null;
-        p.prompt();
-        return p.userChoice;
+        return SB.pwa.promptInstall();
       };
+    } else {
+      window.SBApp.promptInstall = function () { return Promise.resolve("unavailable"); };
     }
   }
 
