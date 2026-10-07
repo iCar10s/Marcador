@@ -513,6 +513,55 @@
     }
 
     window.SBApp = { getState: getState, actions: actions, ui: SB.ui, timer: SB.timer };
+
+    // --- PWA: service worker (solo http/https; file:// queda intacto) ---
+    var deferredInstallPrompt = null;
+    if (location.protocol === "http:" || location.protocol === "https:") {
+      if ("serviceWorker" in navigator) {
+        var reloadingForSw = false;
+        navigator.serviceWorker.addEventListener("controllerchange", function () {
+          if (reloadingForSw) return;
+          reloadingForSw = true;
+          window.location.reload();
+        });
+
+        navigator.serviceWorker.register("./service-worker.js").then(function (registration) {
+          window.SBApp.swRegistration = registration;
+
+          function notifyUpdate() {
+            SB.ui.toast("Nueva versión disponible. Cierra y abre la app para actualizar.");
+          }
+
+          if (registration.waiting) notifyUpdate();
+
+          registration.addEventListener("updatefound", function () {
+            var worker = registration.installing;
+            if (!worker) return;
+            worker.addEventListener("statechange", function () {
+              if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                notifyUpdate();
+              }
+            });
+          });
+        }).catch(function (err) {
+          console.warn("No se pudo registrar el service worker:", err);
+        });
+      }
+
+      window.addEventListener("beforeinstallprompt", function (e) {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (typeof SB.ui.showInstallButton === "function") SB.ui.showInstallButton();
+      });
+
+      window.SBApp.promptInstall = function () {
+        if (!deferredInstallPrompt) return Promise.resolve(null);
+        var p = deferredInstallPrompt;
+        deferredInstallPrompt = null;
+        p.prompt();
+        return p.userChoice;
+      };
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootstrap);
