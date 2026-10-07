@@ -1,11 +1,6 @@
 var SB = window.SB || {};
 
-SB.PROFILES = {
-  FIBA:   { label: "FIBA / Nacional", periods: 4, periodMinutes: 10, periodLabel: "Q", shotClockSeconds: 24, bonusFouls: 5, timeoutsTotal: 4, onCourt: 5 },
-  NCAA:   { label: "NCAA",            periods: 2, periodMinutes: 20, periodLabel: "H", shotClockSeconds: 35, bonusFouls: 6, timeoutsTotal: 5, onCourt: 5 },
-  NBA:    { label: "NBA",             periods: 4, periodMinutes: 12, periodLabel: "Q", shotClockSeconds: 24, bonusFouls: 6, timeoutsTotal: 7, onCourt: 5 },
-  SCHOOL: { label: "Escolar",         periods: 4, periodMinutes: 8,  periodLabel: "Q", shotClockSeconds: 24, bonusFouls: 5, timeoutsTotal: 4, onCourt: 5 }
-};
+SB.PROFILES = SB.rules.sports.basketball.profiles;
 
 SB.uid = function (prefix) {
   return (prefix || "id") + "_" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
@@ -26,7 +21,7 @@ SB.makeTeam = function (name) {
 };
 
 SB.defaultConfig = function () {
-  var p = SB.PROFILES.FIBA;
+  var p = SB.rules.sports.basketball.profiles.FIBA;
   return {
     profile: "FIBA",
     periods: p.periods,
