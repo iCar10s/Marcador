@@ -14,7 +14,7 @@ SB.ui = (function () {
 
   function cache() {
     [
-      "homeName", "awayName", "homeScore", "awayScore", "homeFouls", "awayFouls",
+      "homeName", "awayName", "homeLogo", "awayLogo", "homeLogoButton", "awayLogoButton", "homeLogoRemove", "awayLogoRemove", "homeLogoFile", "awayLogoFile", "homeScore", "awayScore", "homeFouls", "awayFouls",
       "homeDots", "awayDots", "homeTmsLeft", "awayTmsLeft", "homeBonus", "awayBonus",
       "homePoss", "awayPoss", "homeRoster", "awayRoster", "gameClock", "gameClockBox",
       "shotClock", "shotBox", "periodNum", "periodLabel", "periodDown", "periodUp",
@@ -22,7 +22,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -149,6 +149,17 @@ SB.ui = (function () {
     var prefix = side === "home" ? "home" : "away";
     var nameInput = $(prefix + "Name");
     if (nameInput !== document.activeElement && nameInput.value !== t.name) nameInput.value = t.name;
+    var logo = $(prefix + "Logo");
+    var logoButton = $(prefix + "LogoButton");
+    var logoRemove = $(prefix + "LogoRemove");
+    if (logo) {
+      if (logo.src !== t.logo && t.logo) logo.src = t.logo;
+      if (!t.logo) logo.removeAttribute("src");
+      logo.hidden = !t.logo;
+      logoButton.hidden = false;
+      logoButton.textContent = t.logo ? "Cambiar" : "Imagen";
+      logoRemove.hidden = !t.logo;
+    }
     $(prefix + "Score").textContent = String(t.score);
     $(prefix + "Fouls").textContent = String(t.fouls);
     $(prefix + "Bonus").hidden = !SB.isBonus(state, side);
@@ -229,6 +240,13 @@ SB.ui = (function () {
     el.pubShot.classList.toggle("off", state.shotOff);
     el.pubHomeName.textContent = state.home.name;
     el.pubAwayName.textContent = state.away.name;
+    [ ["home", el.pubHomeLogo], ["away", el.pubAwayLogo] ].forEach(function (entry) {
+      var team = state[entry[0]], logo = entry[1];
+      if (!logo) return;
+      if (team.logo && logo.src !== team.logo) logo.src = team.logo;
+      if (!team.logo) logo.removeAttribute("src");
+      logo.hidden = !team.logo;
+    });
     el.pubHomeScore.textContent = String(state.home.score);
     el.pubAwayScore.textContent = String(state.away.score);
     el.pubHomeFouls.textContent = String(state.home.fouls);
@@ -376,6 +394,60 @@ SB.ui = (function () {
   function bind() {
     el.homeName.addEventListener("input", function () { actions.renameTeam("home", this.value); });
     el.awayName.addEventListener("input", function () { actions.renameTeam("away", this.value); });
+
+    ["home", "away"].forEach(function (side) {
+      var prefix = side === "home" ? "home" : "away";
+      el[prefix + "LogoButton"].addEventListener("click", function () { el[prefix + "LogoFile"].click(); });
+      el[prefix + "LogoRemove"].addEventListener("click", function () {
+        actions.setTeamLogo(side, "");
+        el[prefix + "LogoFile"].value = "";
+        render();
+        toast("Imagen del equipo eliminada");
+      });
+      el[prefix + "LogoFile"].addEventListener("change", function () {
+        var file = this.files && this.files[0];
+        var input = this;
+        if (!file) return;
+        if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+          toast("Formato no válido. Usa PNG, JPG o WebP.", true);
+          input.value = "";
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          toast("La imagen supera el máximo de 2 MB.", true);
+          input.value = "";
+          return;
+        }
+        var reader = new FileReader();
+        reader.onerror = function () { toast("No se pudo leer la imagen.", true); input.value = ""; };
+        reader.onload = function () {
+          var source = new Image();
+          source.onerror = function () { toast("El archivo no contiene una imagen válida.", true); input.value = ""; };
+          source.onload = function () {
+            var maxSide = 192;
+            var scale = Math.min(1, maxSide / Math.max(source.naturalWidth, source.naturalHeight));
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(source.naturalHeight * scale));
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+            var dataUrl = canvas.toDataURL("image/webp", 0.72);
+            if (dataUrl.length > 35000) {
+              toast("La imagen optimizada sigue siendo demasiado grande. Prueba con otra imagen.", true);
+              input.value = "";
+              return;
+            }
+            actions.setTeamLogo(side, dataUrl);
+            render();
+            toast("Imagen del equipo actualizada");
+            input.value = "";
+          };
+          source.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
 
     el.homeScore.addEventListener("click", function () { actions.addPoints("home", -1); });
     el.awayScore.addEventListener("click", function () { actions.addPoints("away", -1); });

@@ -74,6 +74,11 @@
       SB.storage.schedule(state);
     },
 
+    setTeamLogo: function (side, logo) {
+      if (side !== "home" && side !== "away") return;
+      mutate(function () { state[side].logo = logo || ""; });
+    },
+
     addPoints: function (side, value) {
       mutate(function () { state[side].score = Math.max(0, state[side].score + value); });
       if (value > 0) SB.audio.point(value);

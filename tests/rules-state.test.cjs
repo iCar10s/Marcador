@@ -203,3 +203,18 @@ test("shot clock automatically resets to configured 24 seconds when a 14-second 
   assert.equal(state.shotRunning, true);
   context.SB.timer.stop();
 });
+
+
+test("teams support an optional logo and preserve it when migrating saved matches", () => {
+  const SB = loadScoreboardCore();
+  const state = SB.createState();
+  const logo = "data:image/webp;base64,dGVzdA==";
+
+  assert.equal(state.home.logo, "");
+  assert.equal(state.away.logo, "");
+  state.home.logo = logo;
+
+  const restored = SB.migrate(state);
+  assert.equal(restored.home.logo, logo);
+  assert.equal(restored.away.logo, "");
+});

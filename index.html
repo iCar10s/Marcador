@@ -39,7 +39,11 @@
     <section class="team" data-side="home" id="teamHome">
       <div class="team__bar" style="--team:var(--home-color)">
         <button class="team__badge" id="homeBonus" title="Bonus de faltas" hidden>BONUS</button>
+        <img class="team__logo" id="homeLogo" alt="Escudo del equipo local" hidden>
         <input class="team__name" id="homeName" value="Local" maxlength="18" aria-label="Nombre equipo local" spellcheck="false">
+        <button class="team__logo-btn" id="homeLogoButton" type="button" title="Cargar bandera, escudo o logotipo">Imagen</button>
+        <button class="team__logo-remove" id="homeLogoRemove" type="button" aria-label="Quitar imagen del equipo local" title="Quitar imagen" hidden>&times;</button>
+        <input class="team__logo-file" id="homeLogoFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
         <div class="team__poss" id="homePoss" title="Posesión de balón" hidden>&#9679;</div>
       </div>
       <div class="team__scorebox" style="--team:var(--home-color)">
@@ -120,7 +124,11 @@
     <section class="team" data-side="away" id="teamAway">
       <div class="team__bar" style="--team:var(--away-color)">
         <button class="team__badge" id="awayBonus" title="Bonus de faltas" hidden>BONUS</button>
+        <img class="team__logo" id="awayLogo" alt="Escudo del equipo visitante" hidden>
         <input class="team__name" id="awayName" value="Visitante" maxlength="18" aria-label="Nombre equipo visitante" spellcheck="false">
+        <button class="team__logo-btn" id="awayLogoButton" type="button" title="Cargar bandera, escudo o logotipo">Imagen</button>
+        <button class="team__logo-remove" id="awayLogoRemove" type="button" aria-label="Quitar imagen del equipo visitante" title="Quitar imagen" hidden>&times;</button>
+        <input class="team__logo-file" id="awayLogoFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
         <div class="team__poss" id="awayPoss" title="Posesión de balón" hidden>&#9679;</div>
       </div>
       <div class="team__scorebox" style="--team:var(--away-color)">
@@ -182,14 +190,14 @@
   <div class="pub__shot" id="pubShot" aria-label="Reloj de posesión">24</div>
   <div class="pub__scores">
     <div class="pub__team">
-      <div class="pub__name" id="pubHomeName">LOCAL</div>
+      <div class="pub__identity"><img class="pub__logo" id="pubHomeLogo" alt="Escudo del equipo local" hidden><div class="pub__name" id="pubHomeName">LOCAL</div></div>
       <div class="pub__score" id="pubHomeScore" style="color:var(--home-color)">0</div>
       <ul class="pub__players" id="pubHomePlayers" aria-label="Jugadores en cancha del equipo local"></ul>
       <div class="pub__fouls">FALTAS <span id="pubHomeFouls">0</span></div>
       <div class="pub__poss" id="pubPossHome">&#9664; POSESION</div>
     </div>
     <div class="pub__team">
-      <div class="pub__name" id="pubAwayName">VISITANTE</div>
+      <div class="pub__identity"><img class="pub__logo" id="pubAwayLogo" alt="Escudo del equipo visitante" hidden><div class="pub__name" id="pubAwayName">VISITANTE</div></div>
       <div class="pub__score" id="pubAwayScore" style="color:var(--away-color)">0</div>
       <ul class="pub__players" id="pubAwayPlayers" aria-label="Jugadores en cancha del equipo visitante"></ul>
       <div class="pub__fouls">FALTAS <span id="pubAwayFouls">0</span></div>
