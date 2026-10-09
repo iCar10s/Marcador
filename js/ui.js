@@ -7,6 +7,7 @@ SB.ui = (function () {
   var rosterSig = { home: "", away: "" };
   var publicRosterSig = { home: "", away: "" };
   var active = { home: null, away: null };
+  var selectedSubstitution = null;
   var toastTimer = null;
   var displayMode = false;
 
@@ -82,7 +83,7 @@ SB.ui = (function () {
         '<button class="mini mini--pts" data-act="pts" data-p="3" type="button">+3</button>' +
         '<button class="mini mini--foul" data-act="foul" type="button" title="Falta personal">F<b>0</b></button>' +
         '<button class="mini mini--time" data-act="time" type="button" title="Minutos jugados (+30s al tocar)">0:00</button>' +
-        '<button class="mini mini--sub" data-act="sub" type="button" title="Cambio (meter/sacar)">&#8646;</button>' +
+        '<button class="mini mini--sub" data-act="sub" type="button" title="Seleccionar jugador para cambio">&#8646;</button>' +
       '</div>';
     li.querySelector(".player__name").placeholder = SB.t("playerPlaceholder") + (index + 1);
     return li;
@@ -121,6 +122,12 @@ SB.ui = (function () {
       li.classList.toggle("player--fouled", p.fouls >= state.config.bonusFouls);
       li.classList.toggle("player--bench", i >= onCourt);
       li.classList.toggle("player--active", active[side] === p.id);
+      li.classList.toggle("player--sub-selected", !!selectedSubstitution && selectedSubstitution.side === side && selectedSubstitution.id === p.id);
+      var subButton = li.querySelector(".mini--sub");
+      if (subButton) {
+        subButton.textContent = selectedSubstitution && selectedSubstitution.side === side && selectedSubstitution.id === p.id ? "✓" : "⇄";
+        subButton.title = selectedSubstitution && selectedSubstitution.side === side && selectedSubstitution.id === p.id ? "Jugador seleccionado; pulsa el jugador de banca para completar" : "Seleccionar jugador para cambio";
+      }
     });
   }
 
@@ -504,7 +511,33 @@ SB.ui = (function () {
           if (mini.dataset.act === "pts") actions.addPlayerPoints(found.side, found.id, Number(mini.dataset.p));
           else if (mini.dataset.act === "foul") actions.addPlayerFoul(found.side, found.id);
           else if (mini.dataset.act === "time") actions.addPlayerSeconds(found.side, found.id);
-          else if (mini.dataset.act === "sub") actions.subPlayer(found.side, found.id);
+          else if (mini.dataset.act === "sub") {
+            var playerIndex = state[found.side].players.findIndex(function (p) { return p.id === found.id; });
+            var onCourt = Math.min(state.config.onCourt, state[found.side].players.length);
+            if (!selectedSubstitution) {
+              selectedSubstitution = { side: found.side, id: found.id };
+              render();
+              toast((playerIndex < onCourt ? "Seleccionado jugador en cancha: " : "Seleccionado jugador de banca: ") + (found.player.name || "Jugador") + ". Ahora selecciona al jugador con el que deseas cambiarlo.");
+            } else if (selectedSubstitution.side !== found.side) {
+              toast("Selecciona el segundo jugador del mismo equipo.", true);
+            } else if (selectedSubstitution.id === found.id) {
+              selectedSubstitution = null;
+              render();
+              toast("Selección de cambio cancelada.");
+            } else {
+              var firstIndex = state[found.side].players.findIndex(function (p) { return p.id === selectedSubstitution.id; });
+              var firstOnCourt = firstIndex >= 0 && firstIndex < onCourt;
+              var secondOnCourt = playerIndex < onCourt;
+              if (firstOnCourt === secondOnCourt) {
+                toast("Para hacer el cambio, selecciona un jugador de cancha y otro de banca.", true);
+              } else {
+                var firstId = selectedSubstitution.id;
+                selectedSubstitution = null;
+                actions.swapPlayers(found.side, firstId, found.id);
+                render();
+              }
+            }
+          }
         }
         return;
       }
