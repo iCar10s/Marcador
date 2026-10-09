@@ -254,7 +254,9 @@ kbd {
 .player--fouled { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
 .player--bench { opacity: 0.5; }
 .player__top { display: flex; align-items: center; gap: 0.35rem; min-width: 0; }
-.player__num { font: 800 1.25em/1 var(--num); color: var(--muted); min-width: 1.8ch; text-align: right; flex: 0 0 auto; }
+.player__num { font: 800 1.05em/1 var(--num); color: var(--muted); width: 2.8ch; min-width: 2.8ch; text-align: center; flex: 0 0 auto; background: var(--panel); border: 1px dashed var(--line); border-radius: 5px; padding: 0.2rem 0; appearance: textfield; -moz-appearance: textfield; }
+.player__num::-webkit-inner-spin-button, .player__num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.player__num:focus { color: var(--text); border-color: var(--accent); outline: 1px solid var(--accent); }
 .player__name {
   min-width: 0; width: 100%;
   font: 700 1.05em/1.25 var(--ui);
