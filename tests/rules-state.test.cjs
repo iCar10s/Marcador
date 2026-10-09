@@ -171,3 +171,35 @@ test("shot clock advances with game clock even if shotRunning was not toggled", 
   assert.equal(state.shotRunning, true);
   context.SB.timer.stop();
 });
+
+test("shot clock resets to configured 24 seconds when a 14-second adjustment expires", () => {
+  let scheduled = null;
+  const context = vm.createContext({});
+  context.window = context;
+  context.__now = 1000;
+  context.Date = class FakeDate { static now() { return context.__now; } };
+  context.setTimeout = (callback) => { scheduled = callback; return 1; };
+  context.clearTimeout = () => { scheduled = null; };
+  for (const file of ["js/rules.js", "js/state.js", "js/timer.js"]) {
+    const source = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+    vm.runInContext(source, context, { filename: file });
+  }
+  const state = context.SB.createState();
+  state.status = "live";
+  state.gameRunning = true;
+  state.shotRunning = true;
+  state.gameSeconds = 600;
+  state.config.shotClockSeconds = 24;
+  state.shotSeconds = 14;
+  context.SB.timer.attach(() => state, () => {});
+  context.SB.timer.start();
+
+  context.__now += 14000;
+  const tick = scheduled;
+  scheduled = null;
+  tick();
+
+  assert.equal(state.shotSeconds, 24);
+  assert.equal(state.shotRunning, true);
+  context.SB.timer.stop();
+});
