@@ -17,7 +17,7 @@ SB.makePlayer = function (num) {
 SB.makeTeam = function (name) {
   var players = [];
   for (var i = 1; i <= 5; i++) players.push(SB.makePlayer(i));
-  return { name: name, score: 0, fouls: 0, timeoutsUsed: 0, players: players };
+  return { name: name, logo: "", score: 0, fouls: 0, timeoutsUsed: 0, players: players };
 };
 
 SB.defaultConfig = function () {
