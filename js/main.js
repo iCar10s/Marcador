@@ -230,6 +230,7 @@
         if (cmd === "reset") {
           state.gameSeconds = state.config.countUp ? 0 : SB.periodSeconds(state);
           state.gameRunning = false;
+          state.shotRunning = false;
           return;
         }
         var delta = Number(cmd);
@@ -241,6 +242,7 @@
     resetGameClockToFull: function () {
       resetClocks({ game: state.config.countUp ? "zero" : "full", shot: "keep", keepRunning: true });
       state.gameRunning = false;
+      state.shotRunning = false;
       commit();
     },
 
@@ -273,7 +275,7 @@
     resetShotClock: function () {
       mutate(function () {
         resetClocks({ game: "keep", shot: "reset", keepRunning: true });
-        state.shotRunning = false;
+        state.shotRunning = SB.shouldRunShotClock(state);
       });
     },
 
@@ -281,7 +283,10 @@
       mutate(function () {
         state.shotOff = !state.shotOff;
         if (state.shotOff) state.shotRunning = false;
-        else state.shotSeconds = state.config.shotClockSeconds;
+        else {
+          state.shotSeconds = state.config.shotClockSeconds;
+          state.shotRunning = SB.shouldRunShotClock(state);
+        }
       });
       ui.toast(state.shotOff ? SB.t("shotOff") : SB.t("shotReset") + state.config.shotClockSeconds + "s");
     },
