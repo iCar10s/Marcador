@@ -156,7 +156,8 @@ SB.ui = (function () {
       if (logo.src !== t.logo && t.logo) logo.src = t.logo;
       if (!t.logo) logo.removeAttribute("src");
       logo.hidden = !t.logo;
-      logoButton.hidden = !!t.logo;
+      logoButton.hidden = false;
+      logoButton.textContent = t.logo ? "Cambiar" : "Imagen";
       logoRemove.hidden = !t.logo;
     }
     $(prefix + "Score").textContent = String(t.score);
@@ -423,7 +424,7 @@ SB.ui = (function () {
           var source = new Image();
           source.onerror = function () { toast("El archivo no contiene una imagen válida.", true); input.value = ""; };
           source.onload = function () {
-            var maxSide = 256;
+            var maxSide = 192;
             var scale = Math.min(1, maxSide / Math.max(source.naturalWidth, source.naturalHeight));
             var canvas = document.createElement("canvas");
             canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
@@ -431,8 +432,8 @@ SB.ui = (function () {
             var ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-            var dataUrl = canvas.toDataURL("image/webp", 0.82);
-            if (dataUrl.length > 400000) {
+            var dataUrl = canvas.toDataURL("image/webp", 0.72);
+            if (dataUrl.length > 35000) {
               toast("La imagen optimizada sigue siendo demasiado grande. Prueba con otra imagen.", true);
               input.value = "";
               return;
