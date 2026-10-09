@@ -169,6 +169,11 @@ kbd {
 }
 .team__name:hover { border-color: var(--line); }
 .team__name:focus { outline: none; border-color: var(--accent); background: var(--panel-2); }
+.team__logo { width: clamp(2rem, 4vw, 3.5rem); height: clamp(2rem, 4vw, 3.5rem); object-fit: contain; flex: 0 0 auto; border-radius: 7px; background: color-mix(in srgb, var(--panel-2) 80%, transparent); }
+.team__logo-btn, .team__logo-remove { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 7px; padding: 0.25rem 0.4rem; color: var(--muted); background: var(--panel-2); font: 700 0.68rem/1 var(--ui); cursor: pointer; }
+.team__logo-btn:hover, .team__logo-remove:hover { color: var(--text); border-color: var(--accent); }
+.team__logo-remove { color: var(--warn); font-size: 1rem; padding: 0.1rem 0.35rem; }
+.team__logo-btn[hidden], .team__logo-remove[hidden], .team__logo[hidden], .pub__logo[hidden] { display: none; }
 .team__badge {
   font: 800 clamp(0.55rem, 0.9vw, 0.8rem)/1 var(--ui);
   letter-spacing: 0.06em;
@@ -412,6 +417,8 @@ body[data-view="display"] #publicView {
 .pub__shot.off { color: var(--muted); }
 .pub__scores { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); width: min(96vw, 1400px); }
 .pub__team { background: #0a0e18; border: 2px solid var(--line); border-radius: 18px; padding: 1rem; display: flex; flex-direction: column; gap: 0.3rem; align-items: center; }
+.pub__identity { display: flex; align-items: center; justify-content: center; gap: clamp(0.5rem, 1.5vw, 1.5rem); width: 100%; min-width: 0; }
+.pub__logo { width: clamp(2.5rem, 7vw, 7rem); height: clamp(2.5rem, 7vw, 7rem); object-fit: contain; flex: 0 0 auto; }
 .pub__name { font: 800 clamp(1.2rem, min(4vw, 5vh), 4rem)/1.1 var(--ui); text-transform: uppercase; letter-spacing: 0.06em; }
 .pub__score { font: 800 clamp(3rem, min(14vw, 17vh), 16rem)/1 var(--num); font-variant-numeric: tabular-nums; }
 .pub__players { list-style: none; margin: 0.15rem 0 0.4rem; padding: 0; width: min(100%, 34rem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem 0.6rem; text-align: left; }
