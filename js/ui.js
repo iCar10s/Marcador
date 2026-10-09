@@ -198,8 +198,11 @@ SB.ui = (function () {
   function renderPublicPlayers(side) {
     var list = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
     var players = SB.onCourtPlayers(state, side);
+    if (!list) return;
     var signature = players.map(function (p) { return p.id + ":" + p.num + ":" + p.name; }).join("|");
-    if (publicRosterSig[side] === signature) return;
+    // La ventana pública puede inicializarse antes de recibir el primer estado.
+    // Comparar también el contenido real evita dejar una lista vacía por una firma obsoleta.
+    if (publicRosterSig[side] === signature && list.children.length === players.length) return;
     publicRosterSig[side] = signature;
     list.textContent = "";
     players.forEach(function (player, index) {
