@@ -99,6 +99,11 @@ SB.onCourtPlayers = function (state, side) {
   return state[side].players.slice(0, Math.max(0, state.config.onCourt));
 };
 
+SB.benchPlayers = function (state, side) {
+  if (!state || !state[side] || !Array.isArray(state[side].players)) return [];
+  return state[side].players.slice(Math.max(0, state.config.onCourt));
+};
+
 SB.shouldRunShotClock = function (state) {
   return !!(state && state.gameRunning && state.status === "live" &&
     !state.shotOff && state.shotSeconds > 0);
@@ -156,6 +161,7 @@ SB.migrate = function (raw) {
     t.fouls = Number(t.fouls) || 0;
     t.timeoutsUsed = Number(t.timeoutsUsed) || 0;
     t.name = t.name || (side === "home" ? "Local" : "Visitante");
+    t.logo = typeof t.logo === "string" ? t.logo : "";
     t.players = (t.players && t.players.length ? t.players : []).map(function (p) {
       return {
         id: p.id || SB.uid("p"),
