@@ -94,6 +94,11 @@ SB.isBonus = function (state, side) {
 };
 
 // El reloj de posesión acompaña al reloj principal; no se ejecuta por separado.
+SB.onCourtPlayers = function (state, side) {
+  if (!state || !state[side] || !Array.isArray(state[side].players)) return [];
+  return state[side].players.slice(0, Math.max(0, state.config.onCourt));
+};
+
 SB.shouldRunShotClock = function (state) {
   return !!(state && state.gameRunning && state.status === "live" &&
     !state.shotOff && state.shotSeconds > 0);
