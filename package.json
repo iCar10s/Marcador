@@ -1,0 +1,12 @@
+{
+  "name": "marcador-baloncesto",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Marcador de baloncesto en JavaScript sin dependencias de ejecución",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
