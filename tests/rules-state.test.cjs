@@ -117,8 +117,10 @@ test("public lineup contains only on-court players and follows substitutions", (
   state.home.players = Array.from({ length: 8 }, (_, i) => ({ id: String(i + 1), num: String(i + 1), name: `Player ${i + 1}` }));
 
   assert.deepEqual(SB.onCourtPlayers(state, "home").map((p) => p.id), ["1", "2", "3", "4", "5"]);
+  assert.deepEqual(SB.benchPlayers(state, "home").map((p) => p.id), ["6", "7", "8"]);
   [state.home.players[0], state.home.players[5]] = [state.home.players[5], state.home.players[0]];
   assert.deepEqual(SB.onCourtPlayers(state, "home").map((p) => p.id), ["6", "2", "3", "4", "5"]);
+  assert.deepEqual(SB.benchPlayers(state, "home").map((p) => p.id), ["1", "7", "8"]);
 });
 
 test("public display hides possession clock below 24 seconds remaining", () => {
@@ -169,6 +171,34 @@ test("shot clock advances with game clock even if shotRunning was not toggled", 
   assert.equal(state.gameSeconds, 599);
   assert.equal(state.shotSeconds, 23);
   assert.equal(state.shotRunning, true);
+  context.SB.timer.stop();
+});
+
+test("timer preserves actual elapsed milliseconds instead of rounding every interval", () => {
+  let scheduled = null;
+  const context = vm.createContext({});
+  context.window = context;
+  context.__now = 1000;
+  context.Date = class FakeDate { static now() { return context.__now; } };
+  context.setTimeout = (callback) => { scheduled = callback; return 1; };
+  context.clearTimeout = () => { scheduled = null; };
+  for (const file of ["js/rules.js", "js/state.js", "js/timer.js"]) {
+    const source = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+    vm.runInContext(source, context, { filename: file });
+  }
+  const state = context.SB.createState();
+  state.status = "live";
+  state.gameRunning = true;
+  state.gameSeconds = 600;
+  context.SB.timer.attach(() => state, () => {});
+  context.SB.timer.start();
+  for (let i = 0; i < 10; i++) {
+    context.__now += 90;
+    const tick = scheduled;
+    scheduled = null;
+    tick();
+  }
+  assert.ok(Math.abs(state.gameSeconds - 599.1) < 1e-9);
   context.SB.timer.stop();
 });
 
