@@ -28,7 +28,7 @@ SB.timer = (function () {
     var dt = (now - lastNow) / 1000;
     lastNow = now;
     if (dt < 0) dt = 0;
-    if (dt > 0.05) dt = Math.round(dt * 10) / 10;
+    // Conserva la fracción real de tiempo transcurrido; redondear cada ciclo acumula deriva.
     if (dt === 0) return;
 
     var limit = SB.periodSeconds(st);

@@ -153,6 +153,36 @@
       ui.setActivePlayer(side, id);
     },
 
+    swapPlayers: function (side, firstId, secondId) {
+      if ((side !== "home" && side !== "away") || !firstId || !secondId || firstId === secondId) return;
+      var list = state[side].players;
+      var firstIndex = list.findIndex(function (p) { return p.id === firstId; });
+      var secondIndex = list.findIndex(function (p) { return p.id === secondId; });
+      if (firstIndex < 0 || secondIndex < 0) return;
+      var firstPlayer = list[firstIndex];
+      var secondPlayer = list[secondIndex];
+      var on = Math.min(state.config.onCourt, list.length);
+      var entering = firstIndex >= on ? firstPlayer : (secondIndex >= on ? secondPlayer : null);
+      var leaving = firstIndex < on ? firstPlayer : (secondIndex < on ? secondPlayer : null);
+      mutate(function () {
+        var tmp = list[firstIndex];
+        list[firstIndex] = list[secondIndex];
+        list[secondIndex] = tmp;
+        var enteringNow = list.findIndex(function (p) { return p.id === entering?.id; });
+        var leavingNow = list.findIndex(function (p) { return p.id === leaving?.id; });
+        if (entering && enteringNow < on) ui.setActivePlayer(side, entering.id);
+        else if (leaving && leavingNow < on) ui.setActivePlayer(side, leaving.id);
+        else ui.setActivePlayer(side, list[0].id);
+      });
+      if (entering && leaving) {
+        var inLabel = (entering.num ? "#" + entering.num + " " : "") + (entering.name || "Jugador");
+        var outLabel = (leaving.num ? "#" + leaving.num + " " : "") + (leaving.name || "Jugador");
+        ui.toast("CAMBIO · ENTRA " + inLabel + " · SALE " + outLabel);
+      } else {
+        ui.toast("Orden de jugadores actualizado");
+      }
+    },
+
     subPlayer: function (side, id) {
       mutate(function () {
         var list = state[side].players;

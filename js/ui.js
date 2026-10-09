@@ -22,7 +22,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeBench", "pubAwayBench", "pubHomeLogo", "pubAwayLogo"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -65,6 +65,8 @@ SB.ui = (function () {
   function buildRosterItem(side, player, index) {
     var li = document.createElement("li");
     li.className = "player";
+    li.draggable = true;
+    li.title = "Arrastra esta tarjeta sobre el jugador con el que deseas hacer el cambio";
     li.style.setProperty("--team", teamColor(side));
     li.dataset.id = player.id;
     li.dataset.side = side;
@@ -207,25 +209,36 @@ SB.ui = (function () {
   }
 
   function renderPublicPlayers(side) {
-    var list = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
-    var players = SB.onCourtPlayers(state, side);
-    if (!list) return;
-    var signature = players.map(function (p) { return p.id + ":" + p.num + ":" + p.name; }).join("|");
-    if (publicRosterSig[side] === signature && list.children.length === players.length) return;
+    var team = state[side];
+    var onCourtList = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
+    var benchList = side === "home" ? el.pubHomeBench : el.pubAwayBench;
+    if (!onCourtList || !benchList) return;
+    var on = Math.min(state.config.onCourt, team.players.length);
+    var signature = team.players.map(function (p, i) {
+      return p.id + ":" + p.num + ":" + p.name + ":" + (i < on ? "court" : "bench");
+    }).join("|");
+    if (publicRosterSig[side] === signature &&
+        onCourtList.children.length === on &&
+        benchList.children.length === team.players.length - on) return;
     publicRosterSig[side] = signature;
-    list.textContent = "";
-    players.forEach(function (player, index) {
+    onCourtList.textContent = "";
+    benchList.textContent = "";
+    team.players.forEach(function (player, index) {
       var item = document.createElement("li");
-      item.className = "pub__player";
+      item.className = "pub__player " + (index < on ? "pub__player--active" : "pub__player--bench");
       var number = document.createElement("span");
       number.className = "pub__player-num";
       number.textContent = player.num === "" ? String(index + 1) : String(player.num);
       var name = document.createElement("span");
       name.className = "pub__player-name";
       name.textContent = player.name || ("Jugador " + (index + 1));
+      var status = document.createElement("span");
+      status.className = "pub__player-status";
+      status.textContent = index < on ? "CANCHA" : "BANCA";
       item.appendChild(number);
       item.appendChild(name);
-      list.appendChild(item);
+      item.appendChild(status);
+      (index < on ? onCourtList : benchList).appendChild(item);
     });
   }
 
@@ -503,6 +516,111 @@ SB.ui = (function () {
     });
 
     [el.homeRoster, el.awayRoster].forEach(function (wrap) {
+      var draggedId = null;
+      var draggedSide = null;
+      var pointerStart = null;
+      var pointerDrag = false;
+
+      function clearDragStyles() {
+        wrap.querySelectorAll(".player--dragging, .player--drop-target").forEach(function (node) {
+          node.classList.remove("player--dragging", "player--drop-target");
+        });
+      }
+
+      function swapDropTarget(target) {
+        if (!target || !draggedId || target.dataset.side !== draggedSide || target.dataset.id === draggedId) return false;
+        actions.swapPlayers(draggedSide, draggedId, target.dataset.id);
+        draggedId = null;
+        draggedSide = null;
+        pointerStart = null;
+        pointerDrag = false;
+        clearDragStyles();
+        render();
+        return true;
+      }
+
+      // Arrastre nativo para ratón/escritorio.
+      wrap.addEventListener("dragstart", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card || e.target.closest("input, button")) { e.preventDefault(); return; }
+        draggedId = card.dataset.id;
+        draggedSide = card.dataset.side;
+        card.classList.add("player--dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", draggedSide + ":" + draggedId);
+        }
+      });
+      wrap.addEventListener("dragover", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card || !draggedId || card.dataset.side !== draggedSide || card.dataset.id === draggedId) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        clearDragStyles();
+        card.classList.add("player--drop-target");
+      });
+      wrap.addEventListener("drop", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card || !draggedId || card.dataset.side !== draggedSide || card.dataset.id === draggedId) return;
+        e.preventDefault();
+        swapDropTarget(card);
+      });
+      wrap.addEventListener("dragend", function () {
+        draggedId = null;
+        draggedSide = null;
+        clearDragStyles();
+      });
+
+      // Arrastre táctil: iniciar desde el asa para no interferir con la edición de campos.
+      wrap.addEventListener("pointerdown", function (e) {
+        var handle = e.target.closest(".player__drag");
+        var card = handle && handle.closest("li.player");
+        if (!card || e.pointerType === "mouse") return;
+        draggedId = card.dataset.id;
+        draggedSide = card.dataset.side;
+        pointerStart = { x: e.clientX, y: e.clientY, pointerId: e.pointerId };
+        if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+        pointerDrag = false;
+      });
+      wrap.addEventListener("pointermove", function (e) {
+        if (!pointerStart || pointerStart.pointerId !== e.pointerId) return;
+        if (!pointerDrag && Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y) > 8) {
+          pointerDrag = true;
+          var source = wrap.querySelector('li.player[data-id="' + draggedId + '"]');
+          if (source) source.classList.add("player--dragging");
+        }
+        if (!pointerDrag) return;
+        var target = document.elementFromPoint(e.clientX, e.clientY);
+        var card = target && target.closest("li.player");
+        clearDragStyles();
+        var source = wrap.querySelector('li.player[data-id="' + draggedId + '"]');
+        if (source) source.classList.add("player--dragging");
+        if (card && card.dataset.side === draggedSide && card.dataset.id !== draggedId) card.classList.add("player--drop-target");
+        e.preventDefault();
+      });
+      wrap.addEventListener("pointerup", function (e) {
+        if (!pointerStart || pointerStart.pointerId !== e.pointerId) return;
+        var wasDrag = pointerDrag;
+        var target = document.elementFromPoint(e.clientX, e.clientY);
+        var card = target && target.closest("li.player");
+        if (wasDrag) {
+          e.preventDefault();
+          swapDropTarget(card);
+        }
+        draggedId = null;
+        draggedSide = null;
+        pointerStart = null;
+        pointerDrag = false;
+        clearDragStyles();
+      });
+      wrap.addEventListener("pointercancel", function () {
+        draggedId = null;
+        draggedSide = null;
+        pointerStart = null;
+        pointerDrag = false;
+        clearDragStyles();
+      });
+
       wrap.addEventListener("input", function (e) {
         if (!e.target.classList.contains("player__name")) return;
         var f = findPlayerFromEvent(e.target);
