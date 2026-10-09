@@ -87,7 +87,13 @@
     },
 
     addTeamFoul: function (side, delta) {
-      mutate(function () { state[side].fouls = Math.max(0, state[side].fouls + delta); });
+      mutate(function () {
+        state[side].fouls = Math.max(0, state[side].fouls + delta);
+        if (delta > 0) {
+          state.gameRunning = false;
+          state.shotRunning = false;
+        }
+      });
       if (delta > 0) SB.audio.foul();
     },
 
@@ -97,6 +103,9 @@
       mutate(function () {
         p.fouls += 1;
         state[side].fouls = Math.max(0, state[side].fouls + 1);
+        // Una falta señalada detiene ambos relojes hasta reanudar el juego.
+        state.gameRunning = false;
+        state.shotRunning = false;
       });
       SB.audio.foul();
     },
@@ -212,6 +221,7 @@
       mutate(function () {
         state.gameRunning = !state.gameRunning;
         if (state.gameRunning) state.status = "live";
+        state.shotRunning = SB.shouldRunShotClock(state);
       });
     },
 
@@ -236,16 +246,26 @@
 
     toggleShotClock: function () {
       if (state.shotOff) { ui.toast(SB.t("shotOff"), true); return; }
-      mutate(function () {
-        state.shotRunning = !state.shotRunning;
-        if (state.shotRunning && state.status === "pre") state.status = "live";
-      });
+      // No se arranca ni se pausa por separado: sigue al reloj principal.
+      state.shotRunning = SB.shouldRunShotClock(state);
+      if (!state.gameRunning) ui.toast("El reloj de posesión se inicia con el reloj de juego");
+      commit();
     },
 
     adjustShotClock: function (cmd) {
       mutate(function () {
-        if (cmd === "reset") { state.shotSeconds = state.config.shotClockSeconds; state.shotRunning = false; return; }
-        if (cmd === "reset14") { state.shotSeconds = 14; state.shotRunning = false; state.shotOff = false; return; }
+        if (cmd === "reset") {
+          state.shotSeconds = state.config.shotClockSeconds;
+          state.shotOff = false;
+          state.shotRunning = SB.shouldRunShotClock(state);
+          return;
+        }
+        if (cmd === "reset14") {
+          state.shotSeconds = 14;
+          state.shotOff = false;
+          state.shotRunning = SB.shouldRunShotClock(state);
+          return;
+        }
         state.shotSeconds = clamp(state.shotSeconds + Number(cmd), 0, state.config.shotClockSeconds);
       });
     },
@@ -271,7 +291,7 @@
         state.possession = SB.other(state.possession);
         if (state.config.autoShotReset) {
           resetClocks({ game: "keep", shot: "reset", keepRunning: true });
-          state.shotRunning = false;
+          state.shotRunning = SB.shouldRunShotClock(state);
         }
       });
     },
@@ -312,6 +332,7 @@
         mutate(function () {
           state.status = "live";
           state.gameRunning = true;
+          state.shotRunning = SB.shouldRunShotClock(state);
         });
         ui.toast("Partido en juego");
         return;
@@ -324,6 +345,7 @@
           resetClocks({ game: state.config.countUp ? "zero" : "full", shot: "reset", keepRunning: true });
           state.gameRunning = true;
           state.status = "live";
+          state.shotRunning = SB.shouldRunShotClock(state);
           state.home.fouls = 0;
           state.away.fouls = 0;
         });
