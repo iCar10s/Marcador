@@ -22,7 +22,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeBench", "pubAwayBench", "pubHomeLogo", "pubAwayLogo"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
