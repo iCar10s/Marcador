@@ -65,6 +65,8 @@ SB.ui = (function () {
   function buildRosterItem(side, player, index) {
     var li = document.createElement("li");
     li.className = "player";
+    li.draggable = true;
+    li.title = "Arrastra este jugador sobre otro para realizar un cambio";
     li.style.setProperty("--team", teamColor(side));
     li.dataset.id = player.id;
     li.dataset.side = side;
@@ -207,25 +209,36 @@ SB.ui = (function () {
   }
 
   function renderPublicPlayers(side) {
-    var list = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
-    var players = SB.onCourtPlayers(state, side);
-    if (!list) return;
-    var signature = players.map(function (p) { return p.id + ":" + p.num + ":" + p.name; }).join("|");
-    if (publicRosterSig[side] === signature && list.children.length === players.length) return;
+    var team = state[side];
+    var onCourtList = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
+    var benchList = side === "home" ? el.pubHomeBench : el.pubAwayBench;
+    if (!onCourtList || !benchList) return;
+    var on = Math.min(state.config.onCourt, team.players.length);
+    var signature = team.players.map(function (p, index) {
+      return p.id + ":" + p.num + ":" + p.name + ":" + (index < on ? "court" : "bench");
+    }).join("|");
+    if (publicRosterSig[side] === signature &&
+        onCourtList.children.length === on &&
+        benchList.children.length === team.players.length - on) return;
     publicRosterSig[side] = signature;
-    list.textContent = "";
-    players.forEach(function (player, index) {
+    onCourtList.textContent = "";
+    benchList.textContent = "";
+    team.players.forEach(function (player, index) {
       var item = document.createElement("li");
-      item.className = "pub__player";
+      item.className = "pub__player " + (index < on ? "pub__player--active" : "pub__player--bench");
       var number = document.createElement("span");
       number.className = "pub__player-num";
       number.textContent = player.num === "" ? String(index + 1) : String(player.num);
       var name = document.createElement("span");
       name.className = "pub__player-name";
       name.textContent = player.name || ("Jugador " + (index + 1));
+      var status = document.createElement("span");
+      status.className = "pub__player-status";
+      status.textContent = index < on ? "CANCHA" : "BANCA";
       item.appendChild(number);
       item.appendChild(name);
-      list.appendChild(item);
+      item.appendChild(status);
+      (index < on ? onCourtList : benchList).appendChild(item);
     });
   }
 
@@ -503,6 +516,47 @@ SB.ui = (function () {
     });
 
     [el.homeRoster, el.awayRoster].forEach(function (wrap) {
+      var draggedId = null;
+      var draggedSide = null;
+      wrap.addEventListener("dragstart", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card) return;
+        draggedId = card.dataset.id;
+        draggedSide = card.dataset.side;
+        card.classList.add("player--dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", draggedSide + ":" + draggedId);
+        }
+      });
+      wrap.addEventListener("dragover", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card || !draggedId || card.dataset.side !== draggedSide || card.dataset.id === draggedId) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        wrap.querySelectorAll(".player--drop-target").forEach(function (node) {
+          node.classList.remove("player--drop-target");
+        });
+        card.classList.add("player--drop-target");
+      });
+      wrap.addEventListener("drop", function (e) {
+        var card = e.target.closest("li.player");
+        if (!card || !draggedId || card.dataset.side !== draggedSide || card.dataset.id === draggedId) return;
+        e.preventDefault();
+        var targetId = card.dataset.id;
+        card.classList.remove("player--drop-target");
+        actions.swapPlayers(draggedSide, draggedId, targetId);
+        draggedId = null;
+        draggedSide = null;
+        render();
+      });
+      wrap.addEventListener("dragend", function () {
+        draggedId = null;
+        draggedSide = null;
+        wrap.querySelectorAll(".player--dragging, .player--drop-target").forEach(function (node) {
+          node.classList.remove("player--dragging", "player--drop-target");
+        });
+      });
       wrap.addEventListener("input", function (e) {
         if (!e.target.classList.contains("player__name")) return;
         var f = findPlayerFromEvent(e.target);
