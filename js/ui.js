@@ -70,7 +70,7 @@ SB.ui = (function () {
     li.dataset.side = side;
     li.innerHTML =
       '<div class="player__top">' +
-        '<span class="player__num"></span>' +
+        '<input class="player__num" type="number" min="0" max="99" inputmode="numeric" aria-label="Número de camiseta" title="Editar número de camiseta">' +
         '<input class="player__name" type="text" maxlength="20" spellcheck="false" aria-label="Nombre del jugador">' +
         '<span class="player__pts">0</span>' +
       '</div>' +
@@ -111,7 +111,7 @@ SB.ui = (function () {
       if (nameInput !== document.activeElement && nameInput.value !== p.name) nameInput.value = p.name;
       var num = li.querySelector(".player__num");
       var numText = p.num === "" ? (i + 1) + "" : p.num;
-      if (num.textContent !== numText) num.textContent = numText;
+      if (num !== document.activeElement && num.value !== numText) num.value = numText;
       li.querySelector(".player__pts").textContent = String(p.points);
       var foulBtn = li.querySelector(".mini--foul");
       foulBtn.querySelector("b").textContent = String(p.fouls);
@@ -198,8 +198,9 @@ SB.ui = (function () {
   function renderPublicPlayers(side) {
     var list = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
     var players = SB.onCourtPlayers(state, side);
+    if (!list) return;
     var signature = players.map(function (p) { return p.id + ":" + p.num + ":" + p.name; }).join("|");
-    if (publicRosterSig[side] === signature) return;
+    if (publicRosterSig[side] === signature && list.children.length === players.length) return;
     publicRosterSig[side] = signature;
     list.textContent = "";
     players.forEach(function (player, index) {
@@ -392,6 +393,12 @@ SB.ui = (function () {
     el.homePoss.addEventListener("click", function () { actions.swapPossession(); });
     el.awayPoss.addEventListener("click", function () { actions.swapPossession(); });
     el.btnUndo.addEventListener("click", function () { actions.undo(); });
+
+    el.board.addEventListener("input", function (e) {
+      if (!e.target.classList.contains("player__num")) return;
+      var found = findPlayerFromEvent(e.target);
+      if (found && found.player) actions.setPlayerField(found.side, found.id, "num", e.target.value);
+    });
 
     el.board.addEventListener("click", function (e) {
       var t = e.target;
