@@ -5,12 +5,13 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 function loadScoreboardCore() {
-  const context = vm.createContext({ window: {} });
+  const context = vm.createContext({});
+  context.window = context;
   for (const file of ["js/rules.js", "js/state.js"]) {
     const source = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
     vm.runInContext(source, context, { filename: file });
   }
-  return context.window.SB;
+  return context.SB;
 }
 
 test("FIBA profile defines the standard four periods and 24-second shot clock", () => {
