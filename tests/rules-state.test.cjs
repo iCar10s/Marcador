@@ -89,3 +89,42 @@ test("timeout count never reports a negative number remaining", () => {
   state.home.timeoutsUsed = state.config.timeoutsTotal + 2;
   assert.equal(SB.timeoutsLeft(state, "home"), 0);
 });
+
+test("shot clock follows the game clock and stops when the game is paused", () => {
+  const SB = loadScoreboardCore();
+  const state = SB.createState();
+
+  assert.equal(SB.shouldRunShotClock(state), false);
+  state.status = "live";
+  state.gameRunning = true;
+  assert.equal(SB.shouldRunShotClock(state), true);
+
+  state.gameRunning = false;
+  assert.equal(SB.shouldRunShotClock(state), false);
+
+  state.gameRunning = true;
+  state.shotOff = true;
+  assert.equal(SB.shouldRunShotClock(state), false);
+
+  state.shotOff = false;
+  state.shotSeconds = 0;
+  assert.equal(SB.shouldRunShotClock(state), false);
+});
+
+test("public display hides possession clock below 24 seconds remaining", () => {
+  const SB = loadScoreboardCore();
+  const state = SB.createState();
+
+  state.gameSeconds = 24;
+  assert.equal(SB.shouldShowPublicShotClock(state), true);
+
+  state.gameSeconds = 23.9;
+  assert.equal(SB.shouldShowPublicShotClock(state), false);
+
+  state.config.countUp = true;
+  state.gameSeconds = SB.periodSeconds(state) - 24;
+  assert.equal(SB.shouldShowPublicShotClock(state), true);
+
+  state.gameSeconds = SB.periodSeconds(state) - 23.9;
+  assert.equal(SB.shouldShowPublicShotClock(state), false);
+});
