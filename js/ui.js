@@ -579,6 +579,7 @@ SB.ui = (function () {
         draggedId = card.dataset.id;
         draggedSide = card.dataset.side;
         pointerStart = { x: e.clientX, y: e.clientY, pointerId: e.pointerId };
+        if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
         pointerDrag = false;
       });
       wrap.addEventListener("pointermove", function (e) {
