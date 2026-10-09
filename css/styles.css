@@ -412,6 +412,10 @@ body[data-view="display"] #publicView {
 .pub__team { background: #0a0e18; border: 2px solid var(--line); border-radius: 18px; padding: 1rem; display: flex; flex-direction: column; gap: 0.3rem; align-items: center; }
 .pub__name { font: 800 clamp(1.2rem, min(4vw, 5vh), 4rem)/1.1 var(--ui); text-transform: uppercase; letter-spacing: 0.06em; }
 .pub__score { font: 800 clamp(3rem, min(14vw, 17vh), 16rem)/1 var(--num); font-variant-numeric: tabular-nums; }
+.pub__players { list-style: none; margin: 0.15rem 0 0.4rem; padding: 0; width: min(100%, 34rem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem 0.6rem; text-align: left; }
+.pub__player { display: flex; align-items: center; gap: 0.45rem; min-width: 0; font: 600 clamp(0.72rem, 1.35vw, 1.2rem)/1.25 var(--ui); }
+.pub__player-num { flex: 0 0 auto; min-width: 1.6em; padding: 0.12em 0.25em; border-radius: 0.3em; background: #20283a; color: var(--accent); text-align: center; font-family: var(--num); }
+.pub__player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pub__fouls { font: 700 clamp(0.9rem, 2vw, 1.8rem)/1 var(--ui); color: var(--muted); letter-spacing: 0.1em; }
 .pub__fouls span { color: var(--text); font-family: var(--num); }
 .pub__poss { font: 800 clamp(0.9rem, 2.2vw, 2rem)/1 var(--ui); color: var(--accent); visibility: hidden; }
