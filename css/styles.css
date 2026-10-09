@@ -451,7 +451,7 @@ body[data-view="display"] .team__poss { font-size: clamp(1.2rem, 2.6vw, 2.4rem);
 @media (max-width: 760px) {
   body[data-view="display"] #publicView { justify-content: flex-start; gap: 0.45rem; padding: max(0.5rem, env(safe-area-inset-top)) 0.5rem max(0.5rem, env(safe-area-inset-bottom)); overflow: auto; }
   body[data-view="display"] .pub__top { flex: 0 0 auto; gap: 0.5rem; }
-  body[data-view="display"] .pub__clock { font-size: clamp(2.7rem, 12vw, 6rem); line-height: 1; }
+  body[data-view="display"] .pub__clock { font-size: clamp(1.5rem, min(12vw, 12vh), 6rem); line-height: 1; width: 100%; }
   body[data-view="display"] .pub__shot { font-size: clamp(1.5rem, 5vw, 3rem); }
   body[data-view="display"] .pub__scores { flex: 0 0 auto; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 0.5rem; }
   body[data-view="display"] .pub__team { overflow: visible; max-height: none; }
