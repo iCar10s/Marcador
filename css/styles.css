@@ -405,6 +405,7 @@ body[data-view="display"] #publicView {
 .pub__status[data-live="1"] { color: var(--ok); }
 .pub__clock { font: 800 clamp(4rem, min(20vw, 24vh), 22rem)/1 var(--num); font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 60%, transparent); }
 .pub__clock.low { color: var(--warn); animation: blink 1s steps(2, start) infinite; }
+#publicView.public--hide-shot .pub__shot { display: none; }
 .pub__shot { font: 800 clamp(2rem, min(7vw, 9vh), 8rem)/1.1 var(--num); color: var(--ok); }
 .pub__shot.off { color: var(--muted); }
 .pub__scores { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); width: min(96vw, 1400px); }
