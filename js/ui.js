@@ -200,6 +200,7 @@ SB.ui = (function () {
     var left = state.config.countUp ? limit - state.gameSeconds : state.gameSeconds;
     el.pubClock.classList.toggle("low", left <= 10 && state.status === "live");
     el.pubPeriod.textContent = SB.periodLabel(state);
+    el.publicView.classList.toggle("public--hide-shot", !SB.shouldShowPublicShotClock(state));
     el.pubShot.textContent = state.shotOff ? "--" : String(Math.ceil(state.shotSeconds));
     el.pubShot.classList.toggle("off", state.shotOff);
     el.pubHomeName.textContent = state.home.name;
