@@ -72,8 +72,11 @@ SB.timer = (function () {
       var sAfter = Math.max(0, sBefore - dt);
       st.shotSeconds = sAfter;
       if (sAfter <= 0) {
-        st.shotRunning = false;
-        emit("scOff", {});
+        // Al agotarse, restablecer siempre el valor reglamentario configurado
+        // (normalmente 24 s), aunque esta posesión se hubiera ajustado a 14 s.
+        st.shotSeconds = st.config.shotClockSeconds;
+        st.shotRunning = !!(st.gameRunning && !st.shotOff);
+        emit("scOff", { resetSeconds: st.shotSeconds });
       } else {
         for (var j = 0; j < SC_TICKS.length; j++) {
           var st2 = SC_TICKS[j];
