@@ -261,6 +261,7 @@ kbd {
 .player[draggable="true"] { cursor: grab; }
 .player--dragging { opacity: 0.32; transform: scale(0.985); }
 .player--drop-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent); }
+.player--sub-selected { opacity: 1; border: 2px solid var(--accent); border-left: 5px solid var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel-2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 32%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent); }
 .player__drag { display: inline-flex; align-items: center; justify-content: center; min-width: 1.7rem; height: 2rem; margin-left: auto; color: var(--accent); font-size: 1.15rem; font-weight: 900; letter-spacing: -0.2em; cursor: grab; touch-action: none; user-select: none; }
 .player__drag:active { cursor: grabbing; }
 .player__top { display: flex; align-items: center; gap: 0.35rem; min-width: 0; }
@@ -293,7 +294,7 @@ kbd {
 .mini--foul { color: var(--warn); display: inline-flex; align-items: center; gap: 0.2em; }
 .mini--foul b { font-family: var(--num); font-weight: 800; }
 .mini--time { color: var(--muted); font-family: var(--num); margin-left: auto; font-size: 0.9em; }
-.mini--sub { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.mini--sub { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); flex: 0 0 auto; }
 .mini:active { transform: scale(0.9); }
 .team__poss { cursor: pointer; }
 
@@ -415,7 +416,7 @@ body[data-view="display"] #publicView {
 .pub__period { font: 800 clamp(1.4rem, 4vw, 4rem)/1 var(--num); color: var(--accent); background: #10131f; border: 2px solid var(--accent); border-radius: 12px; padding: 0.2em 0.6em; }
 .pub__status { font: 800 clamp(1rem, 2.6vw, 2.4rem)/1 var(--ui); letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
 .pub__status[data-live="1"] { color: var(--ok); }
-.pub__clock { font: 800 clamp(4rem, min(20vw, 24vh), 22rem)/1 var(--num); font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 60%, transparent); }
+.pub__clock { flex: 0 1 auto; width: 100%; max-width: 100%; min-width: 0; font: 800 clamp(1.5rem, min(20vw, 24vh), 22rem)/1 var(--num); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; color: #fff; text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 60%, transparent); }
 .pub__clock.low { color: var(--warn); animation: blink 1s steps(2, start) infinite; }
 #publicView.public--hide-shot .pub__shot { display: none; }
 .pub__shot { font: 800 clamp(2rem, min(7vw, 9vh), 8rem)/1.1 var(--num); color: var(--ok); }
@@ -450,7 +451,7 @@ body[data-view="display"] .team__poss { font-size: clamp(1.2rem, 2.6vw, 2.4rem);
 @media (max-width: 760px) {
   body[data-view="display"] #publicView { justify-content: flex-start; gap: 0.45rem; padding: max(0.5rem, env(safe-area-inset-top)) 0.5rem max(0.5rem, env(safe-area-inset-bottom)); overflow: auto; }
   body[data-view="display"] .pub__top { flex: 0 0 auto; gap: 0.5rem; }
-  body[data-view="display"] .pub__clock { font-size: clamp(2.7rem, 12vw, 6rem); line-height: 1; }
+  body[data-view="display"] .pub__clock { font-size: clamp(1.5rem, min(12vw, 12vh), 6rem); line-height: 1; width: 100%; }
   body[data-view="display"] .pub__shot { font-size: clamp(1.5rem, 5vw, 3rem); }
   body[data-view="display"] .pub__scores { flex: 0 0 auto; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 0.5rem; }
   body[data-view="display"] .pub__team { overflow: visible; max-height: none; }
