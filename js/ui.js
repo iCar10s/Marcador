@@ -5,6 +5,7 @@ SB.ui = (function () {
   var actions = null;
   var el = {};
   var rosterSig = { home: "", away: "" };
+  var publicRosterSig = { home: "", away: "" };
   var active = { home: null, away: null };
   var toastTimer = null;
   var displayMode = false;
@@ -21,7 +22,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -194,6 +195,28 @@ SB.ui = (function () {
     el.btnTimeoutAway.textContent = "T. muerto · " + state.away.name;
   }
 
+  function renderPublicPlayers(side) {
+    var list = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
+    var players = SB.onCourtPlayers(state, side);
+    var signature = players.map(function (p) { return p.id + ":" + p.num + ":" + p.name; }).join("|");
+    if (publicRosterSig[side] === signature) return;
+    publicRosterSig[side] = signature;
+    list.textContent = "";
+    players.forEach(function (player, index) {
+      var item = document.createElement("li");
+      item.className = "pub__player";
+      var number = document.createElement("span");
+      number.className = "pub__player-num";
+      number.textContent = player.num === "" ? String(index + 1) : String(player.num);
+      var name = document.createElement("span");
+      name.className = "pub__player-name";
+      name.textContent = player.name || ("Jugador " + (index + 1));
+      item.appendChild(number);
+      item.appendChild(name);
+      list.appendChild(item);
+    });
+  }
+
   function renderPublic() {
     el.pubClock.textContent = SB.formatClock(state.gameSeconds, state.config.countUp);
     var limit = SB.periodSeconds(state);
@@ -214,6 +237,8 @@ SB.ui = (function () {
     el.pubStatus.dataset.live = state.status === "live" ? "1" : "0";
     el.pubPossHome.classList.toggle("on", state.possession === "home");
     el.pubPossAway.classList.toggle("on", state.possession === "away");
+    renderPublicPlayers("home");
+    renderPublicPlayers("away");
   }
 
   function render() {

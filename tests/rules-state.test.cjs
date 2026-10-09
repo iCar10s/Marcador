@@ -111,6 +111,16 @@ test("shot clock follows the game clock and stops when the game is paused", () =
   assert.equal(SB.shouldRunShotClock(state), false);
 });
 
+test("public lineup contains only on-court players and follows substitutions", () => {
+  const SB = loadScoreboardCore();
+  const state = SB.createState();
+  state.home.players = Array.from({ length: 8 }, (_, i) => ({ id: String(i + 1), num: String(i + 1), name: `Player ${i + 1}` }));
+
+  assert.deepEqual(SB.onCourtPlayers(state, "home").map((p) => p.id), ["1", "2", "3", "4", "5"]);
+  [state.home.players[0], state.home.players[5]] = [state.home.players[5], state.home.players[0]];
+  assert.deepEqual(SB.onCourtPlayers(state, "home").map((p) => p.id), ["6", "2", "3", "4", "5"]);
+});
+
 test("public display hides possession clock below 24 seconds remaining", () => {
   const SB = loadScoreboardCore();
   const state = SB.createState();
@@ -127,4 +137,37 @@ test("public display hides possession clock below 24 seconds remaining", () => {
 
   state.gameSeconds = SB.periodSeconds(state) - 23.9;
   assert.equal(SB.shouldShowPublicShotClock(state), false);
+});
+
+
+test("shot clock advances with game clock even if shotRunning was not toggled", () => {
+  let scheduled = null;
+  const context = vm.createContext({});
+  context.window = context;
+  context.__now = 1000;
+  context.Date = class FakeDate { static now() { return context.__now; } };
+  context.setTimeout = (callback) => { scheduled = callback; return 1; };
+  context.clearTimeout = () => { scheduled = null; };
+  for (const file of ["js/rules.js", "js/state.js", "js/timer.js"]) {
+    const source = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+    vm.runInContext(source, context, { filename: file });
+  }
+  const state = context.SB.createState();
+  state.status = "live";
+  state.gameRunning = true;
+  state.shotRunning = false;
+  state.gameSeconds = 600;
+  state.shotSeconds = 24;
+  context.SB.timer.attach(() => state, () => {});
+  context.SB.timer.start();
+
+  context.__now += 1000;
+  const tick = scheduled;
+  scheduled = null;
+  tick();
+
+  assert.equal(state.gameSeconds, 599);
+  assert.equal(state.shotSeconds, 23);
+  assert.equal(state.shotRunning, true);
+  context.SB.timer.stop();
 });

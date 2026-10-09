@@ -63,7 +63,11 @@ SB.timer = (function () {
       }
     }
 
-    if (st.shotRunning && !st.shotOff) {
+    // El reloj de posesión depende directamente del reloj general.
+    // No puede correr por separado ni continuar al terminar/pausar el periodo.
+    var runShotClock = !!(st.gameRunning && !st.shotOff && st.shotSeconds > 0);
+    st.shotRunning = runShotClock;
+    if (runShotClock) {
       var sBefore = st.shotSeconds;
       var sAfter = Math.max(0, sBefore - dt);
       st.shotSeconds = sAfter;
