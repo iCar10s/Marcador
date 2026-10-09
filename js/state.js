@@ -93,6 +93,20 @@ SB.isBonus = function (state, side) {
   return state[side].fouls >= state.config.bonusFouls;
 };
 
+// El reloj de posesión acompaña al reloj principal; no se ejecuta por separado.
+SB.shouldRunShotClock = function (state) {
+  return !!(state && state.gameRunning && state.status === "live" &&
+    !state.shotOff && state.shotSeconds > 0);
+};
+
+// La pantalla pública oculta la posesión cuando quedan menos de 24 segundos de juego.
+SB.shouldShowPublicShotClock = function (state) {
+  var remaining = state.config.countUp
+    ? SB.periodSeconds(state) - state.gameSeconds
+    : state.gameSeconds;
+  return remaining >= 24;
+};
+
 SB.formatClock = function (seconds, countUp) {
   var neg = seconds < 0;
   var s = Math.abs(Math.floor(seconds));
