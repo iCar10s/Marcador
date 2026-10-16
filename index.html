@@ -180,44 +180,54 @@
 
 </div>
 
-<!-- Vista publica para proyectar (sin controles) -->
+<!-- Marcador publico estilo transmision: sin controles administrativos -->
 <div id="publicView" aria-live="off">
-  <div class="pub__top">
-    <div class="pub__period" id="pubPeriod">P1</div>
-    <div class="pub__status" id="pubStatus">PREVIO</div>
-  </div>
-  <div class="pub__clock" id="pubClock">10:00</div>
-  <div class="pub__shot" id="pubShot" aria-label="Reloj de posesión">24</div>
-  <div class="pub__scores">
-    <div class="pub__team">
-      <div class="pub__identity"><img class="pub__logo" id="pubHomeLogo" alt="Escudo del equipo local" hidden><div class="pub__name" id="pubHomeName">LOCAL</div></div>
-      <div class="pub__score" id="pubHomeScore" style="color:var(--home-color)">0</div>
-      <section class="pub__roster-group pub__roster-group--court">
-        <h3>EN CANCHA</h3>
-        <ul class="pub__players" id="pubHomePlayers" aria-label="Jugadores en cancha del equipo local"></ul>
-      </section>
-      <section class="pub__roster-group pub__roster-group--bench">
-        <h3>EN BANCA</h3>
-        <ul class="pub__players" id="pubHomeBench" aria-label="Jugadores en banca del equipo local"></ul>
-      </section>
-      <div class="pub__fouls">FALTAS <span id="pubHomeFouls">0</span></div>
-      <div class="pub__poss" id="pubPossHome">&#9664; POSESION</div>
-    </div>
-    <div class="pub__team">
-      <div class="pub__identity"><img class="pub__logo" id="pubAwayLogo" alt="Escudo del equipo visitante" hidden><div class="pub__name" id="pubAwayName">VISITANTE</div></div>
-      <div class="pub__score" id="pubAwayScore" style="color:var(--away-color)">0</div>
-      <section class="pub__roster-group pub__roster-group--court">
-        <h3>EN CANCHA</h3>
-        <ul class="pub__players" id="pubAwayPlayers" aria-label="Jugadores en cancha del equipo visitante"></ul>
-      </section>
-      <section class="pub__roster-group pub__roster-group--bench">
-        <h3>EN BANCA</h3>
-        <ul class="pub__players" id="pubAwayBench" aria-label="Jugadores en banca del equipo visitante"></ul>
-      </section>
-      <div class="pub__fouls">FALTAS <span id="pubAwayFouls">0</span></div>
-      <div class="pub__poss" id="pubPossAway">POSESION &#9654;</div>
-    </div>
-  </div>
+  <main class="broadcast" aria-label="Marcador publico">
+    <header class="broadcast__header">
+      <div class="broadcast__team broadcast__team--home">
+        <img class="broadcast__logo" id="pubHomeLogo" alt="" hidden>
+        <div class="broadcast__teamname" id="pubHomeName">LOCAL</div>
+      </div>
+      <div class="broadcast__mainclock">
+        <div class="broadcast__label">GLOBAL GAME CLOCK</div>
+        <div class="broadcast__clock" id="pubClock">10:00</div>
+        <div class="broadcast__period" id="pubPeriod">P1</div>
+      </div>
+      <div class="broadcast__team broadcast__team--away">
+        <img class="broadcast__logo" id="pubAwayLogo" alt="" hidden>
+        <div class="broadcast__teamname" id="pubAwayName">VISITANTE</div>
+      </div>
+    </header>
+    <section class="broadcast__scores" aria-label="Puntuacion">
+      <div class="broadcast__scorebox broadcast__scorebox--home">
+        <div class="broadcast__label">SCORE</div>
+        <div class="broadcast__score" id="pubHomeScore">0</div>
+      </div>
+      <div class="broadcast__shotbox">
+        <div class="broadcast__label">SHOT CLOCK</div>
+        <div class="broadcast__shot" id="pubShot">24</div>
+      </div>
+      <div class="broadcast__scorebox broadcast__scorebox--away">
+        <div class="broadcast__label">SCORE</div>
+        <div class="broadcast__score" id="pubAwayScore">0</div>
+      </div>
+    </section>
+    <section class="broadcast__rosters" aria-label="Estadisticas de jugadores">
+      <div class="broadcast__roster">
+        <table><thead><tr><th colspan="3" id="pubHomeRosterTitle">LOCAL — PLAYERS</th></tr><tr><th>TEAM</th><th>PTS</th><th>FOULS</th></tr></thead><tbody id="pubHomePlayers"></tbody></table>
+      </div>
+      <div class="broadcast__roster">
+        <table><thead><tr><th colspan="3" id="pubAwayRosterTitle">VISITANTE — PLAYERS</th></tr><tr><th>TEAM</th><th>PTS</th><th>FOULS</th></tr></thead><tbody id="pubAwayPlayers"></tbody></table>
+      </div>
+    </section>
+    <footer class="broadcast__teamfouls">
+      <div class="broadcast__tabletitle">TEAM FOULS PER PERIOD</div>
+      <table><thead><tr><th>TEAM</th><th>PERIOD</th><th>TOTAL</th><th>BONUS</th></tr></thead><tbody>
+        <tr><th id="pubHomeFoulName">LOCAL</th><td id="pubHomePeriodFouls">0</td><td id="pubHomeFouls">0</td><td id="pubHomeBonus">NO</td></tr>
+        <tr><th id="pubAwayFoulName">VISITANTE</th><td id="pubAwayPeriodFouls">0</td><td id="pubAwayFouls">0</td><td id="pubAwayBonus">NO</td></tr>
+      </tbody></table>
+    </footer>
+  </main>
 </div>
 
 <dialog class="modal" id="dlgSettings">
