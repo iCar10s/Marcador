@@ -490,9 +490,11 @@
         break;
       case "scOff":
         SB.audio.shotOff();
-        // El reloj ya fue restablecido por timer.js; mantenerlo sincronizado con el reloj de juego.
-        state.shotRunning = SB.shouldRunShotClock(state);
+        // El reloj de posesión llegó a cero: timer.js ya detuvo el reloj de juego.
+        state.gameRunning = false;
+        state.shotRunning = false;
         ui.render();
+        broadcast();
         break;
     }
   }

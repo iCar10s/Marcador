@@ -72,10 +72,11 @@ SB.timer = (function () {
       var sAfter = Math.max(0, sBefore - dt);
       st.shotSeconds = sAfter;
       if (sAfter <= 0) {
-        // Restablecer el valor configurado (24 s por defecto), incluso si se ajustó a 14.
-        st.shotSeconds = st.config.shotClockSeconds;
-        st.shotRunning = !!(st.gameRunning && !st.shotOff);
-        emit("scOff", { resetSeconds: st.shotSeconds });
+        // La posesión llega a cero y detiene ambos relojes; no reiniciar automáticamente.
+        st.shotSeconds = 0;
+        st.gameRunning = false;
+        st.shotRunning = false;
+        emit("scOff", { resetSeconds: 0 });
       } else {
         for (var j = 0; j < SC_TICKS.length; j++) {
           var st2 = SC_TICKS[j];

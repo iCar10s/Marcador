@@ -202,7 +202,7 @@ test("timer preserves actual elapsed milliseconds instead of rounding every inte
   context.SB.timer.stop();
 });
 
-test("shot clock automatically resets to configured 24 seconds when a 14-second clock expires", () => {
+test("shot clock reaching zero displays zero and stops the game clock", () => {
   let scheduled = null;
   const context = vm.createContext({});
   context.window = context;
@@ -220,17 +220,19 @@ test("shot clock automatically resets to configured 24 seconds when a 14-second 
   state.shotRunning = true;
   state.gameSeconds = 600;
   state.config.shotClockSeconds = 24;
-  state.shotSeconds = 14;
+  state.shotSeconds = 1;
   context.SB.timer.attach(() => state, () => {});
   context.SB.timer.start();
 
-  context.__now += 14000;
+  context.__now += 1000;
   const tick = scheduled;
   scheduled = null;
   tick();
 
-  assert.equal(state.shotSeconds, 24);
-  assert.equal(state.shotRunning, true);
+  assert.equal(state.shotSeconds, 0);
+  assert.equal(state.gameRunning, false);
+  assert.equal(state.shotRunning, false);
+  assert.equal(state.gameSeconds, 599);
   context.SB.timer.stop();
 });
 
