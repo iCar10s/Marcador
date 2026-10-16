@@ -23,7 +23,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeBench", "pubAwayBench", "pubHomeLogo", "pubAwayLogo"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo", "pubHomeRosterTitle", "pubAwayRosterTitle", "pubHomeFoulName", "pubAwayFoulName", "pubHomePeriodFouls", "pubAwayPeriodFouls", "pubHomeBonus", "pubAwayBonus"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -217,36 +217,27 @@ SB.ui = (function () {
 
   function renderPublicPlayers(side) {
     var team = state[side];
-    var onCourtList = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
-    var benchList = side === "home" ? el.pubHomeBench : el.pubAwayBench;
-    if (!onCourtList || !benchList) return;
+    var body = side === "home" ? el.pubHomePlayers : el.pubAwayPlayers;
     var on = Math.min(state.config.onCourt, team.players.length);
-    var signature = team.players.map(function (p, i) {
-      return p.id + ":" + p.num + ":" + p.name + ":" + (i < on ? "court" : "bench");
-    }).join("|");
-    if (publicRosterSig[side] === signature &&
-        onCourtList.children.length === on &&
-        benchList.children.length === team.players.length - on) return;
-    publicRosterSig[side] = signature;
-    onCourtList.textContent = "";
-    benchList.textContent = "";
+    if (!body) return;
+    body.textContent = "";
     team.players.forEach(function (player, index) {
-      var item = document.createElement("li");
-      item.className = "pub__player " + (index < on ? "pub__player--active" : "pub__player--bench");
-      var number = document.createElement("span");
-      number.className = "pub__player-num";
-      number.textContent = player.num === "" ? String(index + 1) : String(player.num);
-      var name = document.createElement("span");
-      name.className = "pub__player-name";
-      name.textContent = player.name || ("Jugador " + (index + 1));
-      var status = document.createElement("span");
-      status.className = "pub__player-status";
-      status.textContent = index < on ? "CANCHA" : "BANCA";
-      item.appendChild(number);
-      item.appendChild(name);
-      item.appendChild(status);
-      (index < on ? onCourtList : benchList).appendChild(item);
+      var row = document.createElement("tr");
+      if (index < on) row.className = "broadcast__player--court";
+      var name = document.createElement("th");
+      name.scope = "row";
+      name.textContent = (player.name || ("Player " + (index + 1))) + (player.num !== "" ? " #" + player.num : "");
+      var points = document.createElement("td");
+      points.textContent = String(player.points || 0);
+      var fouls = document.createElement("td");
+      fouls.textContent = String(player.fouls || 0);
+      row.appendChild(name);
+      row.appendChild(points);
+      row.appendChild(fouls);
+      body.appendChild(row);
     });
+    var title = side === "home" ? el.pubHomeRosterTitle : el.pubAwayRosterTitle;
+    if (title) title.textContent = team.name + " — PLAYERS";
   }
 
   function renderPublic() {
@@ -255,12 +246,14 @@ SB.ui = (function () {
     var left = state.config.countUp ? limit - state.gameSeconds : state.gameSeconds;
     el.pubClock.classList.toggle("low", left <= 10 && state.status === "live");
     el.pubPeriod.textContent = SB.periodLabel(state);
-    el.publicView.classList.toggle("public--hide-shot", !SB.shouldShowPublicShotClock(state));
-    el.pubShot.textContent = state.shotOff ? "--" : String(Math.ceil(state.shotSeconds));
-    el.pubShot.classList.toggle("off", state.shotOff);
+    if (el.pubShot) {
+      el.pubShot.textContent = state.shotOff ? "--" : String(Math.ceil(state.shotSeconds));
+      el.pubShot.classList.toggle("off", state.shotOff);
+      el.pubShot.parentElement.hidden = !SB.shouldShowPublicShotClock(state);
+    }
     el.pubHomeName.textContent = state.home.name;
     el.pubAwayName.textContent = state.away.name;
-    [ ["home", el.pubHomeLogo], ["away", el.pubAwayLogo] ].forEach(function (entry) {
+    [[ "home", el.pubHomeLogo ], [ "away", el.pubAwayLogo ]].forEach(function (entry) {
       var team = state[entry[0]], logo = entry[1];
       if (!logo) return;
       if (team.logo && logo.src !== team.logo) logo.src = team.logo;
@@ -271,11 +264,14 @@ SB.ui = (function () {
     el.pubAwayScore.textContent = String(state.away.score);
     el.pubHomeFouls.textContent = String(state.home.fouls);
     el.pubAwayFouls.textContent = String(state.away.fouls);
-    var map = { pre: "Previo", live: "En juego", break: "Pausa", final: "Finalizado" };
-    el.pubStatus.textContent = map[state.status] || "Previo";
-    el.pubStatus.dataset.live = state.status === "live" ? "1" : "0";
-    el.pubPossHome.classList.toggle("on", state.possession === "home");
-    el.pubPossAway.classList.toggle("on", state.possession === "away");
+    el.pubHomeFoulName.textContent = state.home.name;
+    el.pubAwayFoulName.textContent = state.away.name;
+    el.pubHomePeriodFouls.textContent = String(state.home.fouls);
+    el.pubAwayPeriodFouls.textContent = String(state.away.fouls);
+    el.pubHomeBonus.textContent = SB.isBonus(state, "home") ? "YES" : "NO";
+    el.pubAwayBonus.textContent = SB.isBonus(state, "away") ? "YES" : "NO";
+    el.pubHomeBonus.classList.toggle("is-bonus", SB.isBonus(state, "home"));
+    el.pubAwayBonus.classList.toggle("is-bonus", SB.isBonus(state, "away"));
     renderPublicPlayers("home");
     renderPublicPlayers("away");
   }
