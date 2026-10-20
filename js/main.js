@@ -4,6 +4,7 @@
   var wakeLock = null;
   var bus = null;
   var isPublicWindow = /[?&]view=display/.test(window.location.search);
+  var isHoopWindow = /[?&]view=hoop/.test(window.location.search);
 
   function getState() { return state; }
 
@@ -518,6 +519,7 @@
     ui = SB.ui;
     SB.ui.init(state, actions);
     if (isPublicWindow) SB.ui.setDisplayMode(true);
+    if (isHoopWindow) document.body.setAttribute("data-view", "hoop");
     if (!isPublicWindow) SB.ui.setSaveIndicator(SB.storage.save(state));
 
     if ("BroadcastChannel" in window) {
