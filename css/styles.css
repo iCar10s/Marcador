@@ -591,3 +591,30 @@ body.no-roster .roster { display: none; }
 @media print {
   .topbar, .botbar, .center__bigctrls, .clockbox__ctrls, .shotbox__ctrls, .team__quick { display: none; }
 }
+
+
+/* Public roster refinements: readable names and timeout counter */
+.broadcast__roster table { font-size: clamp(.68rem, 1.18vw, 1.25rem); }
+.broadcast__roster tbody th { font-size: 1.08em; font-weight: 800; }
+.broadcast__roster tbody tr { transition: background .18s ease, color .18s ease; }
+.broadcast__roster tbody tr:nth-child(even) { background: #171717; }
+.broadcast__roster .broadcast__player--court { background: linear-gradient(90deg, color-mix(in srgb, var(--home-color) 20%, #101010), #101010); }
+.broadcast__roster .broadcast__player--court th { color: #fff !important; }
+.broadcast__roster .broadcast__player--court th::before { content: "● "; color: #2fffc2; }
+.broadcast__timeout-row td { text-align: center; background: #252525; color: #fff; font-weight: 900; font-size: .9em; padding: .28em; }
+@media (max-aspect-ratio: 4/3) { .broadcast__roster table { font-size: clamp(.58rem, 1.65vw, 1rem); } }
+
+/* Dedicated third monitor: only the two clocks, no score or controls */
+body[data-view="hoop"] { margin: 0; background: #000; color: #fff; overflow: hidden; }
+body[data-view="hoop"] #app, body[data-view="hoop"] #publicView, body[data-view="hoop"] .topbar, body[data-view="hoop"] .botbar { display: none !important; }
+#hoopView { display: none; }
+body[data-view="hoop"] #hoopView { display: flex; position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; align-items: stretch; justify-content: stretch; background: #000; }
+.hoop-board { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2vw; padding: 1.2vh 1.2vw; box-sizing: border-box; background: #000; }
+.hoop-clockbox { min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; border: clamp(2px, .35vw, 8px) solid #777; background: #090909; overflow: hidden; }
+.hoop-label { color: #fff; font-size: clamp(.7rem, 3vw, 4rem); font-weight: 900; letter-spacing: .08em; text-align: center; }
+.hoop-game-clock, .hoop-shot-clock { font-size: clamp(2.5rem, 18vw, 24rem); font-weight: 1000; line-height: .95; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.06em; }
+.hoop-game-clock { color: #ffef00; }
+.hoop-shot-clock { color: #ff3333; }
+.hoop-shot-clock.is-zero { animation: hoop-zero-flash .45s steps(2, end) infinite; }
+@keyframes hoop-zero-flash { 50% { color: #fff; } }
+@media (max-height: 400px) { .hoop-label { font-size: clamp(.6rem, 4vh, 1.8rem); } .hoop-game-clock, .hoop-shot-clock { font-size: clamp(2rem, 30vh, 8rem); } }
