@@ -31,6 +31,7 @@
       <button class="btn btn--icon" id="btnSettings" title="Ajustes" aria-label="Ajustes">&#9881;</button>
       <button class="btn btn--icon" id="btnFull" title="Pantalla completa (F)" aria-label="Pantalla completa">&#9974;</button>
       <button class="btn btn--icon" id="btnPublic" title="Abrir pantalla publica en otra ventana" aria-label="Pantalla publica">&#128250;</button>
+      <button class="btn btn--icon" id="btnHoopDisplay" title="Abrir monitor sobre la canasta" aria-label="Monitor de canasta">&#127936;</button>
     </div>
   </header>
 
@@ -214,10 +215,10 @@
     </section>
     <section class="broadcast__rosters" aria-label="Estadisticas de jugadores">
       <div class="broadcast__roster">
-        <table><thead><tr><th colspan="3" id="pubHomeRosterTitle">LOCAL — PLAYERS</th></tr><tr><th>TEAM</th><th>PTS</th><th>FOULS</th></tr></thead><tbody id="pubHomePlayers"></tbody></table>
+        <table><thead><tr><th colspan="3" id="pubHomeRosterTitle">LOCAL — PLAYERS</th></tr><tr><th>PLAYER</th><th>PTS</th><th>FOULS</th></tr><tr class="broadcast__timeout-row"><td colspan="3" id="pubHomeTimeouts">TIMEOUTS: 0 / 5</td></tr></thead><tbody id="pubHomePlayers"></tbody></table>
       </div>
       <div class="broadcast__roster">
-        <table><thead><tr><th colspan="3" id="pubAwayRosterTitle">VISITANTE — PLAYERS</th></tr><tr><th>TEAM</th><th>PTS</th><th>FOULS</th></tr></thead><tbody id="pubAwayPlayers"></tbody></table>
+        <table><thead><tr><th colspan="3" id="pubAwayRosterTitle">VISITANTE — PLAYERS</th></tr><tr><th>PLAYER</th><th>PTS</th><th>FOULS</th></tr><tr class="broadcast__timeout-row"><td colspan="3" id="pubAwayTimeouts">TIMEOUTS: 0 / 5</td></tr></thead><tbody id="pubAwayPlayers"></tbody></table>
       </div>
     </section>
     <footer class="broadcast__teamfouls">
@@ -227,6 +228,13 @@
         <tr><th id="pubAwayFoulName">VISITANTE</th><td id="pubAwayPeriodFouls">0</td><td id="pubAwayFouls">0</td><td id="pubAwayBonus">NO</td></tr>
       </tbody></table>
     </footer>
+  </main>
+</div>
+
+<div id="hoopView" aria-live="off">
+  <main class="hoop-board" aria-label="Relojes sobre la canasta">
+    <section class="hoop-clockbox"><div class="hoop-label">RELOJ DE JUEGO</div><div class="hoop-game-clock" id="hoopGameClock">10:00</div></section>
+    <section class="hoop-clockbox hoop-clockbox--shot"><div class="hoop-label">RELOJ DE TIRO</div><div class="hoop-shot-clock" id="hoopShotClock">24</div></section>
   </main>
 </div>
 

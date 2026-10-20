@@ -71,7 +71,7 @@ SB.audio = (function () {
     },
     periodEnd: function () { sequence([[1046, 0.28, "sine", 0.3], [1046, 0.28, "sine", 0.3]], 0.34); },
     shotLow: function () { tone({ freq: 1046, dur: 0.06, type: "square", gain: 0.18 }); },
-    shotOff: function () { sequence([[180, 0.42, "sawtooth", 0.28]], 0); },
+    shotOff: function () { sequence([[392, 0.42, "sawtooth", 0.34], [523, 0.42, "sawtooth", 0.34], [392, 0.5, "square", 0.3]], 0.16); },
     click: function () { tone({ freq: 420, dur: 0.04, type: "sine", gain: 0.1 }); }
   };
 })();
