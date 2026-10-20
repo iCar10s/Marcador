@@ -23,7 +23,7 @@ SB.ui = (function () {
       "dlgSettings", "dlgRoster", "editHome", "editAway", "rosterTitleHome", "rosterTitleAway",
       "saveList", "fileImport", "btnUndo", "publicView", "pubClock", "pubPeriod",
       "pubShot", "pubStatus", "pubHomeName", "pubAwayName", "pubHomeScore",
-      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo", "pubHomeRosterTitle", "pubAwayRosterTitle", "pubHomeFoulName", "pubAwayFoulName", "pubHomePeriodFouls", "pubAwayPeriodFouls", "pubHomeBonus", "pubAwayBonus"
+      "pubAwayScore", "pubHomeFouls", "pubAwayFouls", "pubPossHome", "pubPossAway", "pubHomePlayers", "pubAwayPlayers", "pubHomeLogo", "pubAwayLogo", "pubHomeRosterTitle", "pubAwayRosterTitle", "pubHomeFoulName", "pubAwayFoulName", "pubHomePeriodFouls", "pubAwayPeriodFouls", "pubHomeBonus", "pubAwayBonus", "pubHomeTimeouts", "pubAwayTimeouts", "hoopGameClock", "hoopShotClock"
     ].forEach(function (id) { el[id] = $(id); });
 
     el.setProfile = $("setProfile");
@@ -226,7 +226,7 @@ SB.ui = (function () {
       if (index < on) row.className = "broadcast__player--court";
       var name = document.createElement("th");
       name.scope = "row";
-      name.textContent = (player.name || ("Player " + (index + 1))) + (player.num !== "" ? " #" + player.num : "");
+      name.textContent = (player.num !== "" ? "#" + player.num + " " : "") + (player.name || ("Player " + (index + 1)));
       var points = document.createElement("td");
       points.textContent = String(player.points || 0);
       var fouls = document.createElement("td");
@@ -238,6 +238,8 @@ SB.ui = (function () {
     });
     var title = side === "home" ? el.pubHomeRosterTitle : el.pubAwayRosterTitle;
     if (title) title.textContent = team.name + " — PLAYERS";
+    var timeoutCell = side === "home" ? el.pubHomeTimeouts : el.pubAwayTimeouts;
+    if (timeoutCell) timeoutCell.textContent = "TIMEOUTS: " + SB.timeoutsLeft(state, side) + " / " + state.config.timeoutsTotal;
   }
 
   function renderPublic() {
@@ -274,6 +276,9 @@ SB.ui = (function () {
     el.pubAwayBonus.classList.toggle("is-bonus", SB.isBonus(state, "away"));
     renderPublicPlayers("home");
     renderPublicPlayers("away");
+    if (el.hoopGameClock) el.hoopGameClock.textContent = SB.formatClock(state.gameSeconds, state.config.countUp);
+    if (el.hoopShotClock) el.hoopShotClock.textContent = state.shotOff ? "--" : String(Math.ceil(state.shotSeconds));
+    if (el.hoopShotClock) el.hoopShotClock.classList.toggle("is-zero", !state.shotOff && state.shotSeconds <= 0);
   }
 
   function render() {
@@ -733,6 +738,8 @@ SB.ui = (function () {
     });
 
     $("btnFull").addEventListener("click", function () { api.toggleFullscreen(); });
+
+    $("btnHoopDisplay").addEventListener("click", function () { window.open(window.location.pathname + "?view=hoop", "marcadorHoop", "popup=yes,width=1000,height=300"); });
 
     $("btnPublic").addEventListener("click", function () {
       window.open(location.pathname + "?view=display", "sb-public", "noopener");
