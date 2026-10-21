@@ -367,5 +367,14 @@
 <script src="js/ui.js"></script>
 <script src="js/shortcuts.js"></script>
 <script src="js/main.js"></script>
+<script>
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js").catch(function (error) {
+        console.warn("No se pudo activar el modo sin conexión:", error);
+      });
+    });
+  }
+</script>
 </body>
 </html>
