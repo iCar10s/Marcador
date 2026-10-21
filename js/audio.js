@@ -47,25 +47,27 @@ SB.audio = (function () {
   function horn() {
     var c = ensure();
     if (!c) return;
-    // A brassy two-note chord, closer to a truck air horn than electronic beeps.
+
+    // Bright arena-style buzzer: stable brass-like chord, without the ominous downward pitch.
+    // Hold the main chord for 4 seconds and fade out smoothly.
     [
-      { freq: 370, to: 355, gain: 0.34, type: "sawtooth" },
-      { freq: 440, to: 425, gain: 0.30, type: "sawtooth" },
-      { freq: 554, to: 535, gain: 0.12, type: "square" }
+      { freq: 523.25, gain: 0.24, type: "sawtooth" },
+      { freq: 659.25, gain: 0.20, type: "sawtooth" },
+      { freq: 783.99, gain: 0.10, type: "triangle" }
     ].forEach(function (part) {
       var o = c.createOscillator();
       var g = c.createGain();
       o.type = part.type;
       o.frequency.setValueAtTime(part.freq, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(part.to, c.currentTime + 0.78);
       g.gain.setValueAtTime(0.0001, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(part.gain, c.currentTime + 0.035);
-      g.gain.setValueAtTime(part.gain, c.currentTime + 0.58);
-      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.82);
+      g.gain.exponentialRampToValueAtTime(part.gain, c.currentTime + 0.04);
+      g.gain.setValueAtTime(part.gain, c.currentTime + 3.55);
+      g.gain.setValueAtTime(part.gain * 0.92, c.currentTime + 3.68);
+      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 4.0);
       o.connect(g);
       g.connect(master);
       o.start(c.currentTime);
-      o.stop(c.currentTime + 0.85);
+      o.stop(c.currentTime + 4.03);
     });
   }
 
