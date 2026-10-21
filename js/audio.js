@@ -44,6 +44,31 @@ SB.audio = (function () {
     o.stop(c.currentTime + opts.dur + 0.02);
   }
 
+  function horn() {
+    var c = ensure();
+    if (!c) return;
+    // A brassy two-note chord, closer to a truck air horn than electronic beeps.
+    [
+      { freq: 370, to: 355, gain: 0.34, type: "sawtooth" },
+      { freq: 440, to: 425, gain: 0.30, type: "sawtooth" },
+      { freq: 554, to: 535, gain: 0.12, type: "square" }
+    ].forEach(function (part) {
+      var o = c.createOscillator();
+      var g = c.createGain();
+      o.type = part.type;
+      o.frequency.setValueAtTime(part.freq, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(part.to, c.currentTime + 0.78);
+      g.gain.setValueAtTime(0.0001, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(part.gain, c.currentTime + 0.035);
+      g.gain.setValueAtTime(part.gain, c.currentTime + 0.58);
+      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.82);
+      o.connect(g);
+      g.connect(master);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + 0.85);
+    });
+  }
+
   function sequence(notes, gap) {
     var c = ensure();
     if (!c) return;
@@ -71,7 +96,7 @@ SB.audio = (function () {
     },
     periodEnd: function () { sequence([[1046, 0.28, "sine", 0.3], [1046, 0.28, "sine", 0.3]], 0.34); },
     shotLow: function () { tone({ freq: 1046, dur: 0.06, type: "square", gain: 0.18 }); },
-    shotOff: function () { sequence([[392, 0.42, "sawtooth", 0.34], [523, 0.42, "sawtooth", 0.34], [392, 0.5, "square", 0.3]], 0.16); },
+    shotOff: horn,
     click: function () { tone({ freq: 420, dur: 0.04, type: "sine", gain: 0.1 }); }
   };
 })();
