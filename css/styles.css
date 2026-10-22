@@ -618,3 +618,66 @@ body[data-view="hoop"] #hoopView { display: flex; position: fixed; inset: 0; wid
 .hoop-shot-clock.is-zero { animation: hoop-zero-flash .45s steps(2, end) infinite; }
 @keyframes hoop-zero-flash { 50% { color: #fff; } }
 @media (max-height: 400px) { .hoop-label { font-size: clamp(.6rem, 4vh, 1.8rem); } .hoop-game-clock, .hoop-shot-clock { font-size: clamp(2rem, 30vh, 8rem); } }
+
+
+/* Responsive physical-style shot-clock display (third screen). */
+body[data-view="hoop"] #hoopView {
+  align-items: stretch;
+  justify-content: stretch;
+  overflow: hidden;
+}
+body[data-view="hoop"] .hoop-board {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(3px, 0.8vmin, 12px);
+  padding: clamp(3px, 0.8vmin, 12px);
+  min-width: 0;
+  min-height: 0;
+}
+body[data-view="hoop"] .hoop-clockbox {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  border-width: clamp(2px, 0.5vmin, 8px);
+  padding: 0;
+  box-sizing: border-box;
+}
+body[data-view="hoop"] .hoop-label {
+  display: none;
+}
+body[data-view="hoop"] .hoop-game-clock,
+body[data-view="hoop"] .hoop-shot-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  font-size: clamp(2rem, min(24vw, 34vh), 30rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-align: center;
+  overflow: hidden;
+}
+body[data-view="hoop"] .hoop-game-clock {
+  color: #fff;
+}
+body[data-view="hoop"] .hoop-shot-clock {
+  color: #ff4058;
+}
+@media (orientation: landscape) {
+  body[data-view="hoop"] .hoop-game-clock,
+  body[data-view="hoop"] .hoop-shot-clock {
+    font-size: clamp(2rem, min(16vw, 37vh), 30rem);
+  }
+}
+@media (max-height: 320px) {
+  body[data-view="hoop"] .hoop-board {
+    gap: 2px;
+    padding: 2px;
+  }
+  body[data-view="hoop"] .hoop-game-clock,
+  body[data-view="hoop"] .hoop-shot-clock {
+    font-size: clamp(1.5rem, 28vh, 12rem);
+  }
+}
